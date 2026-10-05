@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.QLCT" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <item name="colorPrimary">#006B54</item>
+        <item name="colorPrimaryVariant">#004D3D</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorSecondary">#006B54</item>
+    </style>
+</resources>

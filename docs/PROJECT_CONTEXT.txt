@@ -1,0 +1,12 @@
+Dự án: QLCT. Thư mục chính: D:\QLCT.
+Người dùng học lập trình di động; giao tiếp bằng tiếng Việt.
+Đồ án phải có ứng dụng Android và báo cáo Word (.docx).
+Báo cáo cần flow chức năng, use case diagram, class diagram, ERD, kiểm thử và ảnh chụp thực tế.
+Cập nhật báo cáo theo mã; phân biệt thiết kế dự kiến và tính năng đã triển khai. Không bịa kết quả kiểm thử.
+Phạm vi đề xuất: thu/chi, danh mục, tìm kiếm/lọc, ngân sách và thống kê.
+Chưa chốt: mẫu trường, hạn nộp, thành viên, đăng nhập, API và online.
+Báo cáo hiện tại là đề cương, chưa có sơ đồ hình hoặc tính năng nghiệp vụ.
+
+Cập nhật đã xác nhận: nhóm 4 thành viên; chưa có mẫu báo cáo, được trình bày tự do; bắt buộc có database. Đề xuất Room/SQLite cục bộ. Hạn nộp và yêu cầu online/API/đăng nhập chưa xác nhận.
+
+Basic 0.2: Da trien khai them/sua/xoa giao dich, loc loai va thang, tong thu chi. Database thuc te dung SQLiteOpenHelper (khong phai Room); 7 danh muc, 8 giao dich mau, seed chi onCreate. APK assembleDebug thanh cong; test SQLite host dat; chua test UI vi khong co thiet bi. Bao cao hien tai: Bao_cao_QLCT_Basic.docx. Room trong de cuong cu chi la de xuat ban dau.
