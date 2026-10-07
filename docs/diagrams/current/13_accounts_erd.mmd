@@ -1,0 +1,23 @@
+erDiagram
+    LOCAL_ACCOUNT ||--o{ TRANSACTIONS : owns
+    CATEGORIES ||--o{ TRANSACTIONS : categorizes
+    LOCAL_ACCOUNT {
+        int id PK
+        string username UK
+        string salt
+        string passwordHash
+        boolean demoSeeded
+    }
+    CATEGORIES {
+        long id PK
+        string name UK
+    }
+    TRANSACTIONS {
+        long id PK
+        int user_id FK "nullable only for unassigned legacy rows"
+        long category_id FK
+        string type
+        long amount
+        string date
+        string note
+    }
