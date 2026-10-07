@@ -20,7 +20,10 @@ object AccountValidator {
     }
 }
 
-class AuthRepository(private val dao: AccountDao, private val demoSeeder: DemoDataSeeder? = null) {
+class AuthRepository(
+    private val dao: AccountDao,
+    private val demoSeeder: DemoDataSeeder? = null
+) {
     suspend fun hasAccount(): Boolean = dao.account() != null
 
     suspend fun register(username: String, password: String, confirmation: String): LocalAccount {

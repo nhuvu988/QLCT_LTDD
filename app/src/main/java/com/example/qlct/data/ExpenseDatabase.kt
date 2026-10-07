@@ -69,16 +69,25 @@ abstract class ExpenseDatabase : RoomDatabase() {
             }
         }
 
+        fun seedCallback(context: Context): Callback = object : Callback() {
+            private fun statements(): List<String> = context.applicationContext.assets.open("seed.sql")
+                .bufferedReader().use { it.readText() }.split(';').map(String::trim).filter(String::isNotEmpty)
+
+            override fun onCreate(db: SupportSQLiteDatabase) {
+                statements().forEach(db::execSQL)
+            }
+
+            override fun onOpen(db: SupportSQLiteDatabase) {
+                // Existing installations get the initial account too. The unique username
+                // and INSERT OR IGNORE preserve password, ID, seed flag, and personal rows.
+                statements().filter { it.startsWith("INSERT OR IGNORE INTO local_account") }.forEach(db::execSQL)
+            }
+        }
+
         fun getInstance(context: Context): ExpenseDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, ExpenseDatabase::class.java, "qlct.db")
                 .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
-                .addCallback(object : Callback() {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        // Seed only a newly created database. Existing installations are migrated.
-                        context.applicationContext.assets.open("seed.sql").bufferedReader().use { it.readText() }
-                            .split(';').map(String::trim).filter(String::isNotEmpty).forEach(db::execSQL)
-                    }
-                }).build().also { instance = it }
+                .addCallback(seedCallback(context)).build().also { instance = it }
         }
     }
 }

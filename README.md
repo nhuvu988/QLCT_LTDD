@@ -7,7 +7,7 @@
 - Thêm, sửa, xóa giao dịch thu/chi.
 - Đăng nhập/đăng ký cục bộ, nhiều tài khoản với giao dịch tách riêng theo `user_id`. Tài khoản mới có 0 giao dịch, tổng thu/chi bằng 0. Nút Đăng xuất cố định ở đầu màn hình và hoạt động trên cả ba tab. Tên đăng nhập 3–32 ký tự không dấu/số/_, mật khẩu 8–128 ký tự. Mật khẩu lưu dưới dạng PBKDF2 với salt ngẫu nhiên, không lưu dạng rõ. Phiên chỉ ở bộ nhớ; chưa có cloud hoặc khôi phục mật khẩu.
 - Lọc theo loại giao dịch, chọn tháng hoặc toàn bộ thời gian; hiển thị tổng thu/chi và chênh lệch.
-- Room lưu dữ liệu cục bộ; `seed.sql` chỉ tạo 7 danh mục. Theo yêu cầu demo, tài khoản `vu98` được nạp riêng 6 khoản chi (ăn trưa, xăng, sách, đồ dùng, phòng, ăn sáng), tổng 1.345.000 VND, một lần sau đăng ký/đăng nhập thành công. `DemoDataSeeder` lưu cờ `demoSeeded` trong Room nên mở lại/đăng nhập lại không nhân đôi và không tái tạo dòng đã xóa. Các tài khoản khác vẫn bắt đầu rỗng. Mật khẩu demo do người dùng chọn được nhập qua màn hình, không hardcode trong seed/app.
+- `seed.sql` tạo 7 danh mục và bản ghi tài khoản `vu98` trong bảng `local_account`; mật khẩu `12345678` được lưu bằng hash PBKDF2 + salt, không lưu rõ. Áp dụng cả debug/release. Room callback dùng `INSERT OR IGNORE` để bổ sung tài khoản còn thiếu và giữ ID, mật khẩu, dữ liệu của tài khoản đã tồn tại. Đăng nhập thực sự truy vấn database và kiểm tra hash. `vu98` có 6 khoản chi mẫu, tổng 1.345.000 VND, nạp một lần sau đăng nhập; `demoSeeded` ngăn nhân đôi và ngăn tái tạo dòng đã xóa. Tài khoản đăng ký khác vẫn bắt đầu rỗng.
 - Biểu đồ cột tổng chi của 6 tháng đến tháng đã chọn, kèm số tiền từng tháng.
 - Giao diện tông tím, thẻ bo góc, biểu đồ vòng phân bổ khoản chi theo danh mục và thanh điều hướng Tổng quan / Giao dịch / Thống kê. Nút + mở biểu mẫu thêm giao dịch; chạm giao dịch để sửa và nút thùng rác để xóa có xác nhận.
 - Báo cáo đồ án hiện tại: [Word](docs/Bao_cao_Do_an_QLCT_Compose_MVVM_Room.docx) và [PDF](docs/Bao_cao_Do_an_QLCT_Compose_MVVM_Room.pdf), mô tả bản Compose–MVVM–Room, 9 use case, 12 sơ đồ và 8 ảnh giao diện thật. Nguồn sơ đồ PNG/SVG nằm trong `docs/diagrams/current/`; sinh báo cáo bằng `docs/build_final_report.py` (cần python-docx, matplotlib và Pillow). Bổ sung tên trường, khoa, lớp, giảng viên, năm học và xác nhận phân công thực tế trước khi nộp. Báo cáo Basic và đề cương cũ là tài liệu lịch sử.
@@ -30,6 +30,8 @@ Số tiền phải là số nguyên VND từ 1 đến 999.999.999.999; không ch
 Biểu đồ chỉ cộng khoản chi, độc lập với bộ lọc Thu/Chi của danh sách. Tổng quan phụ thuộc khoảng thời gian đã chọn và cũng độc lập với bộ lọc loại giao dịch.
 
 ## Chạy dự án
+
+Clone/pull mã chỉ mang theo mã nguồn, không sao chép database tài khoản/giao dịch từ máy khác. Cài và chạy app trên máy mới rồi đăng nhập `vu98 / 12345678`; tài khoản khởi tạo từ bản ghi trong `seed.sql` và được lưu thật vào Room. Tài khoản tự đăng ký sinh salt ngẫu nhiên riêng. Các giao dịch thật đã nhập trên máy cũ chưa được đồng bộ vì app chưa có máy chủ. Không cần đưa file `qlct.db` vào Git.
 
 Mở thư mục repo bằng Android Studio, chờ Gradle Sync, chọn cấu hình `app`, chọn máy ảo hoặc điện thoại Android API 24 trở lên và nhấn Run. Dự án dùng compileSdk/targetSdk 37; cấu hình JDK của Gradle nằm trong `gradle/gradle-daemon-jvm.properties`.
 

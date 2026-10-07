@@ -30,7 +30,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         if (state.value.busy) return
         mutableState.value = AuthState()
         viewModelScope.launch {
-            try { mutableState.value = AuthState(loading = false, setup = !repository.hasAccount()) }
+            try {
+                mutableState.value = AuthState(loading = false, setup = !repository.hasAccount())
+            }
             catch (cancel: CancellationException) { throw cancel }
             catch (_: Exception) { mutableState.value = AuthState(error = "Không đọc được tài khoản. Nhấn Thử lại.") }
         }
