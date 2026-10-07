@@ -37,12 +37,15 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
     val busy by model.busy.collectAsStateWithLifecycle()
     val actionError by model.actionError.collectAsStateWithLifecycle()
     val completedActions by model.completedActions.collectAsStateWithLifecycle()
+    var budgetMonth by rememberSaveable { mutableStateOf<String?>(null) }
+    var budgetAmount by rememberSaveable { mutableStateOf<Long?>(null) }
     var editorOpen by rememberSaveable { mutableStateOf(false) }
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
     var deletingId by rememberSaveable { mutableStateOf<Long?>(null) }
     var handledActions by rememberSaveable { mutableLongStateOf(0L) }
     LaunchedEffect(completedActions) {
         if (completedActions > handledActions) {
+            budgetMonth = null
             editorOpen = false
             deletingId = null
             handledActions = completedActions
@@ -52,6 +55,7 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
     val deleting = state.summary.visible.find { it.id == deletingId }
 
     var tab by rememberSaveable { mutableIntStateOf(0) }
+    val displayRows = if (tab == 1) state.searchResults else state.summary.visible
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(tab) { listState.scrollToItem(0) }
     Scaffold(
@@ -92,6 +96,15 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
                     DashboardHeader(state, { model.changeMonth(-1) }, { model.changeMonth(1) }, model::setMonthOnly)
                 }
                 if (tab != 1) {
+                    item {
+                        Box(Modifier.padding(horizontal = 16.dp)) {
+                            MonthlyBudgetCard(state.month, state.budget, busy) {
+                                budgetMonth = state.month.toString()
+                                budgetAmount = state.budget.limit
+                                model.clearError()
+                            }
+                        }
+                    }
                     item { Box(Modifier.padding(horizontal = 16.dp)) { CategoryChart(state.summary, detailed = tab == 2) } }
                     item { Box(Modifier.padding(horizontal = 16.dp)) { SpendingChart(state.summary.chart, detailed = tab == 2) } }
                 }
@@ -102,22 +115,28 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
                                 Text(if (tab == 0) "Giao dịch gần đây" else "Lịch sử giao dịch", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                                 if (tab == 0) TextButton(onClick = { tab = 1 }) { Text("Xem tất cả", fontSize = 11.sp) }
                             }
+                            if (tab == 1) OutlinedTextField(
+                                value = state.query, onValueChange = model::setQuery,
+                                label = { Text("Tìm ghi chú hoặc danh mục") }, singleLine = true,
+                                supportingText = { Text("Có thể gõ không dấu. Kết hợp với bộ lọc tháng và Thu/Chi.") },
+                                trailingIcon = { if (state.query.isNotEmpty()) TextButton(onClick = { model.setQuery("") }) { Text("Xóa") } },
+                                modifier = Modifier.fillMaxWidth())
                             if (tab == 1) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                 listOf("ALL" to "Tất cả", "INCOME" to "Thu", "EXPENSE" to "Chi").forEach { (value, label) ->
                                     FilterChip(selected = state.type == value, onClick = { model.setType(value) }, label = { Text(label) })
                                 }
                             }
-                            Text(if (tab == 0) "${state.summary.visible.size} giao dịch · ${if (state.type == "INCOME") "Khoản thu" else if (state.type == "EXPENSE") "Khoản chi" else "Thu và chi"}" else "${state.summary.visible.size} giao dịch · Chạm để sửa", color = Muted, style = MaterialTheme.typography.bodySmall)
+                            Text(if (tab == 0) "${displayRows.size} giao dịch · ${if (state.type == "INCOME") "Khoản thu" else if (state.type == "EXPENSE") "Khoản chi" else "Thu và chi"}" else "${displayRows.size} giao dịch · Chạm để sửa", color = Muted, style = MaterialTheme.typography.bodySmall)
                         }
                     }
-                    if (state.summary.visible.isEmpty()) item {
+                    if (displayRows.isEmpty()) item {
                         Box(Modifier.padding(horizontal = 16.dp)) {
-                            DashboardCard("Chưa có giao dịch") {
-                                Text("Nhấn nút + bên dưới để ghi lại khoản thu hoặc chi của bạn.", color = Muted, style = MaterialTheme.typography.bodySmall)
+                            DashboardCard(if (tab == 1 && state.query.isNotBlank()) "Không tìm thấy giao dịch" else "Chưa có giao dịch") {
+                                Text(if (tab == 1 && state.query.isNotBlank()) "Thử từ khóa khác hoặc thay đổi bộ lọc tháng, Thu/Chi." else "Nhấn nút + bên dưới để ghi lại khoản thu hoặc chi của bạn.", color = Muted, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }
-                    items(if (tab == 0) state.summary.visible.take(4) else state.summary.visible, key = { it.id }) { transaction ->
+                    items(if (tab == 0) displayRows.take(4) else displayRows, key = { it.id }) { transaction ->
                         Box(Modifier.padding(horizontal = 16.dp)) {
                             TransactionTile(transaction, busy, {
                                 editingId = transaction.id; model.clearError(); editorOpen = true
@@ -129,6 +148,12 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
         }
     }
 
+    budgetMonth?.let { selectedMonth ->
+        BudgetEditor(selectedMonth, budgetAmount, busy, actionError,
+            onDismiss = { budgetMonth = null; model.clearError() },
+            onSave = { model.saveBudget(selectedMonth, it) },
+            onDelete = { model.deleteBudget(selectedMonth) })
+    }
     if (editorOpen && !state.loading && state.loadError == null) {
         TransactionEditor(existing = editing, categories = state.categories, busy = busy, actionError = actionError,
             onDismiss = { editorOpen = false; model.clearError() },

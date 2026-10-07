@@ -29,7 +29,7 @@ class ExpenseDatabaseTest {
             legacy.version = 1
         }
         fun open() = Room.databaseBuilder(context, ExpenseDatabase::class.java, name)
-            .addMigrations(ExpenseDatabase.MIGRATION_1_2, ExpenseDatabase.MIGRATION_2_3, ExpenseDatabase.MIGRATION_3_4, ExpenseDatabase.MIGRATION_4_5).build()
+            .addMigrations(ExpenseDatabase.MIGRATION_1_2, ExpenseDatabase.MIGRATION_2_3, ExpenseDatabase.MIGRATION_3_4, ExpenseDatabase.MIGRATION_4_5, ExpenseDatabase.MIGRATION_5_6).build()
         try {
             open().useDb { db ->
                 val dao = db.dao()

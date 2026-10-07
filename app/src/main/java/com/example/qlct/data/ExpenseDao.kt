@@ -4,10 +4,20 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import androidx.room.Upsert
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ExpenseDao {
+    @Query("SELECT * FROM budgets WHERE user_id = :userId ORDER BY month DESC")
+    fun observeBudgets(userId: Int): Flow<List<MonthlyBudget>>
+
+    @Upsert
+    suspend fun saveBudget(budget: MonthlyBudget)
+
+    @Query("DELETE FROM budgets WHERE user_id = :userId AND month = :month")
+    suspend fun deleteBudget(userId: Int, month: String)
+
     @Query("SELECT * FROM categories ORDER BY id")
     fun observeCategories(): Flow<List<Category>>
 

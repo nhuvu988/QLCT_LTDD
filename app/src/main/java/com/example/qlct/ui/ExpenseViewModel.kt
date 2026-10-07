@@ -28,7 +28,10 @@ data class ExpenseUiState(
     val monthOnly: Boolean = true,
     val type: String = "ALL",
     val summary: ExpenseSummary = ExpenseSummary(0, 0, emptyList(), emptyList()),
-    val loadError: String? = null
+    val loadError: String? = null,
+    val query: String = "",
+    val searchResults: List<TransactionRow> = emptyList(),
+    val budget: BudgetStatus = BudgetStatus()
 )
 
 @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
@@ -36,15 +39,22 @@ class ExpenseViewModel(private val repository: ExpenseRepository, private val sa
     private val month = savedState.getStateFlow("month", YearMonth.now().toString())
     private val monthOnly = savedState.getStateFlow("monthOnly", true)
     private val type = savedState.getStateFlow("type", "ALL")
+    private val query = savedState.getStateFlow("query", "")
     private val retry = MutableStateFlow(0)
     val busy = MutableStateFlow(false)
     val actionError = MutableStateFlow<String?>(null)
     val completedActions = MutableStateFlow(0L)
 
     val state = retry.flatMapLatest {
-        combine(repository.categories, repository.transactions, month, monthOnly, type) { categories, rows, selectedMonth, only, filter ->
+        val base = combine(repository.categories, repository.transactions, month, monthOnly, type) { categories, rows, selectedMonth, only, filter ->
             val selected = YearMonth.parse(selectedMonth)
             ExpenseUiState(false, categories, selected, only, filter, summarize(rows, selected, only, filter))
+        }
+        combine(base, repository.budgets, query) { current, budgets, text ->
+            current.copy(query = text,
+                searchResults = searchTransactions(current.summary.visible, text),
+                budget = BudgetStatus(budgets.find { it.month == current.month.toString() }?.amount,
+                    current.summary.chart.lastOrNull()?.amount ?: 0))
         }.catch { error ->
             if (error is CancellationException) throw error
             emit(ExpenseUiState(loading = false, loadError = "Không tải được dữ liệu. Vui lòng thử lại."))
@@ -54,6 +64,9 @@ class ExpenseViewModel(private val repository: ExpenseRepository, private val sa
     fun changeMonth(delta: Long) { savedState["month"] = YearMonth.parse(month.value).plusMonths(delta).toString() }
     fun setMonthOnly(value: Boolean) { savedState["monthOnly"] = value }
     fun setType(value: String) { savedState["type"] = value }
+    fun setQuery(value: String) { savedState["query"] = value }
+    fun saveBudget(month: String, amount: Long) = mutate { repository.saveBudget(month, amount) }
+    fun deleteBudget(month: String) = mutate { repository.deleteBudget(month) }
     fun retryLoad() { retry.value++ }
     fun clearError() { actionError.value = null }
 

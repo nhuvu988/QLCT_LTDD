@@ -33,7 +33,7 @@ class AccountMigrationTest {
             db.version = 3
         }
         val db = Room.databaseBuilder(context,ExpenseDatabase::class.java,name)
-            .addMigrations(ExpenseDatabase.MIGRATION_3_4, ExpenseDatabase.MIGRATION_4_5).build()
+            .addMigrations(ExpenseDatabase.MIGRATION_3_4, ExpenseDatabase.MIGRATION_4_5, ExpenseDatabase.MIGRATION_5_6).build()
         try {
             assertEquals("existing",db.accountDao().account()!!.username)
             assertEquals(2L,db.dao().observeTransactions(1).first().single().id)
@@ -49,6 +49,7 @@ class AccountMigrationTest {
         SQLiteDatabase.create(null).use { db ->
             db.execSQL("CREATE TABLE categories (id INTEGER PRIMARY KEY, name TEXT NOT NULL)")
             db.execSQL("CREATE TABLE transactions (id INTEGER PRIMARY KEY)")
+            db.execSQL("CREATE TABLE local_account (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, salt TEXT NOT NULL, passwordHash TEXT NOT NULL, demoSeeded INTEGER NOT NULL DEFAULT 0)")
             context.assets.open("seed.sql").bufferedReader().use { it.readText() }
                 .split(';').map(String::trim).filter(String::isNotEmpty).forEach(db::execSQL)
             db.rawQuery("SELECT COUNT(*) FROM categories",null).use { it.moveToFirst(); assertEquals(7,it.getInt(0)) }

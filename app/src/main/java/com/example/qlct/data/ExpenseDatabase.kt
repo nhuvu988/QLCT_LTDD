@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Category::class, TransactionEntity::class, LocalAccount::class], version = 5, exportSchema = true)
+@Database(entities = [Category::class, TransactionEntity::class, LocalAccount::class, MonthlyBudget::class], version = 6, exportSchema = true)
 abstract class ExpenseDatabase : RoomDatabase() {
     abstract fun dao(): ExpenseDao
     abstract fun accountDao(): AccountDao
@@ -69,9 +69,15 @@ abstract class ExpenseDatabase : RoomDatabase() {
             }
         }
 
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS budgets (user_id INTEGER NOT NULL, month TEXT NOT NULL, amount INTEGER NOT NULL, PRIMARY KEY(user_id, month), FOREIGN KEY(user_id) REFERENCES local_account(id) ON UPDATE NO ACTION ON DELETE NO ACTION)")
+            }
+        }
+
         fun getInstance(context: Context): ExpenseDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, ExpenseDatabase::class.java, "qlct.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
                 .addCallback(DatabaseSeedCallback(context))
                 .build().also { instance = it }
         }

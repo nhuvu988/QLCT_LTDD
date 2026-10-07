@@ -2,6 +2,16 @@
 
 Đồ án môn Lập trình di động, nhóm 4 thành viên.
 
+## Ngân sách tháng và tìm kiếm giao dịch
+
+- **Tổng quan / Thống kê → Ngân sách tháng → Đặt ngân sách**: chọn tháng ở đầu màn hình và lưu hạn mức tổng chi. Có sửa và xóa (xác nhận trước khi xóa), không ảnh hưởng giao dịch.
+- Hiển thị Đã chi, Hạn mức, Còn lại/Vượt ngân sách và tiến trình. Cảnh báo từ 80%, hết ngân sách ở 100%, vượt mức khi >100%. Mỗi tài khoản và tháng có hạn mức riêng. Tháng chưa đặt hạn mức không hiển thị cảnh báo.
+- Ngân sách luôn tính tổng khoản chi của tháng đã chọn, không phụ thuộc bộ lọc Thu/Chi, tìm kiếm hoặc chế độ xem toàn bộ thời gian. Thêm/sửa/xóa/chuyển ngày giao dịch cập nhật lại qua Room Flow.
+- **Giao dịch → Tìm ghi chú hoặc danh mục**: hỗ trợ chữ hoa/thường và tiếng Việt không dấu (ví dụ `an trua`, `do xang`). Mọi từ khóa phải khớp ghi chú hoặc tên danh mục. Kết hợp bộ lọc tháng và Thu/Chi. Nút Xóa xóa từ khóa, không xóa giao dịch. Số kết quả và trạng thái không tìm thấy cập nhật ngay.
+- Tìm kiếm chỉ thay đổi danh sách, không thay đổi số dư/tổng thu chi, biểu đồ hoặc ngân sách. Chưa có ngân sách theo danh mục hoặc thông báo nền.
+- [Phụ lục Word: Ngân sách và Tìm kiếm](docs/Phu_luc_Ngan_sach_Tim_kiem.docx), [sơ đồ](docs/diagrams/budget_search), [kết quả kiểm thử](docs/budget_search_validation.txt). Phụ lục bổ sung cho báo cáo Word/PDF cũ; ảnh trong báo cáo cũ chưa phản ánh hai tính năng mới.
+- Tạo lại phụ lục: cài `python-docx`, `matplotlib`, chạy `python docs/budget_report.py`.
+
 ## Phiên bản hiện tại
 
 - Thêm, sửa, xóa giao dịch thu/chi.
@@ -23,7 +33,7 @@ Giao diện, biểu mẫu và bộ chọn ngày đều dùng Compose Material 3.
 
 Luồng MVVM: `MainActivity` → `ExpenseScreen` → `ExpenseViewModel` → `ExpenseRepository` → `ExpenseDao` → Room. DAO trả Flow, ViewModel cung cấp StateFlow, giao diện quan sát theo lifecycle. Bộ lọc và tháng dùng SavedStateHandle; dữ liệu nhập dùng rememberSaveable.
 
-Database `qlct.db` phiên bản 5 có migration 1→2→3→4→5. Quan hệ: `local_account.id` → `transactions.user_id` và `categories.id` → `transactions.category_id`; cả hai là khóa ngoại có index, NO ACTION. Danh mục dùng chung, không có FK trực tiếp từ account tới categories. Version 5 thêm cờ demo và chuyển dữ liệu cũ chưa gán tài khoản thành `user_id=NULL`; dữ liệu/ID và dữ liệu cá nhân của tài khoản cũ được giữ. Repository đọc/update/delete theo tài khoản. Room xuất schema vào `app/schemas/`. Báo cáo Word hiện tại là snapshot trước đăng nhập; phần seed tám giao dịch trong báo cáo là mô tả bản cũ.
+Database `qlct.db` phiên bản 6 có migration 1→2→3→4→5→6. Bảng `budgets` có khóa chính `(user_id, month)`, khóa ngoại `user_id` tới `local_account.id`, số tiền `amount` nguyên VND. Migration 5→6 chỉ thêm bảng, không xóa dữ liệu. Quan hệ: `local_account.id` → `transactions.user_id` và `categories.id` → `transactions.category_id`; cả hai là khóa ngoại có index, NO ACTION. Danh mục dùng chung, không có FK trực tiếp từ account tới categories. Version 5 thêm cờ demo và chuyển dữ liệu cũ chưa gán tài khoản thành `user_id=NULL`; dữ liệu/ID và dữ liệu cá nhân của tài khoản cũ được giữ. Repository đọc/update/delete theo tài khoản. Room xuất schema vào `app/schemas/`. Báo cáo Word hiện tại là snapshot trước đăng nhập; phần seed tám giao dịch trong báo cáo là mô tả bản cũ.
 
 Số tiền phải là số nguyên VND từ 1 đến 999.999.999.999; không chấp nhận số âm hoặc số 0. Loại Thu/Chi quyết định dấu khi hiển thị và tổng hợp, số tiền lưu luôn dương. Khi nhấn Lưu với dữ liệu sai, ô Số tiền hiện lỗi cụ thể và giữ biểu mẫu; quy tắc được kiểm tra lại trong repository cho cả thêm và sửa.
 
@@ -74,3 +84,11 @@ python docs/tests/test_database.py
 Bảng tài khoản thật là `local_account`, liên kết với `transactions.user_id` bằng khóa ngoại. Không cần tạo thêm bảng account trùng chức năng. Room lưu cả tài khoản và giao dịch vào `qlct.db` trong bộ nhớ ứng dụng, giữ dữ liệu qua đóng/mở app và đăng xuất. Phiên đăng nhập chỉ ở RAM nên mở lại có thể cần đăng nhập, nhưng bản ghi vẫn còn. Dữ liệu cục bộ không tự đồng bộ giữa thiết bị, không nằm trên GitHub và bị xóa nếu gỡ app hoặc Clear Data.
 
 Cài bản cập nhật đè lên app hiện tại để giữ database. Tài khoản mẫu mới: `vu98` / `11111111`. Nếu `vu98` đã tồn tại với mật khẩu khác, seed không tự reset mật khẩu đó. Dùng mật khẩu đã đăng ký trên thiết bị hoặc đăng ký tài khoản khác; không xóa dữ liệu để xử lý lỗi đăng nhập.
+
+Kiểm tra migration ngân sách sau khi build schema v6:
+
+```powershell
+python docs/tests/test_budget_migration.py
+```
+
+Unit test mới: `BudgetAndSearchTest` kiểm tra mốc cảnh báo, tìm kiếm không dấu, kết hợp bộ lọc và tính lại tổng chi. Instrumentation `MonthlyBudgetTest` kiểm tra lưu/mở lại, cập nhật, xóa, validation và phân tách tài khoản/tháng; cần thiết bị Android để chạy.
