@@ -1,0 +1,6 @@
+﻿Account seed update, 2026-10-07
+PASS: Python persistent SQLite seed test (password hash, FK, reopen, no duplicate rows, existing password preserved).
+PASS: Python legacy Room migration check.
+PASS: Gradle :app:assembleDebug :app:testDebugUnitTest :app:assembleDebugAndroidTest (BUILD SUCCESSFUL).
+Android instrumentation tests compiled but not executed: no connected Android device.
+The seed inserts missing vu98 only; it does not reset an existing account password.

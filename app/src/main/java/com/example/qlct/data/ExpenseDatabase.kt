@@ -72,13 +72,8 @@ abstract class ExpenseDatabase : RoomDatabase() {
         fun getInstance(context: Context): ExpenseDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, ExpenseDatabase::class.java, "qlct.db")
                 .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
-                .addCallback(object : Callback() {
-                    override fun onCreate(db: SupportSQLiteDatabase) {
-                        // Seed only a newly created database. Existing installations are migrated.
-                        context.applicationContext.assets.open("seed.sql").bufferedReader().use { it.readText() }
-                            .split(';').map(String::trim).filter(String::isNotEmpty).forEach(db::execSQL)
-                    }
-                }).build().also { instance = it }
+                .addCallback(DatabaseSeedCallback(context))
+                .build().also { instance = it }
         }
     }
 }

@@ -7,7 +7,7 @@
 - Thêm, sửa, xóa giao dịch thu/chi.
 - Đăng nhập/đăng ký cục bộ, nhiều tài khoản với giao dịch tách riêng theo `user_id`. Tài khoản mới có 0 giao dịch, tổng thu/chi bằng 0. Nút Đăng xuất cố định ở đầu màn hình và hoạt động trên cả ba tab. Tên đăng nhập 3–32 ký tự không dấu/số/_, mật khẩu 8–128 ký tự. Mật khẩu lưu dưới dạng PBKDF2 với salt ngẫu nhiên, không lưu dạng rõ. Phiên chỉ ở bộ nhớ; chưa có cloud hoặc khôi phục mật khẩu.
 - Lọc theo loại giao dịch, chọn tháng hoặc toàn bộ thời gian; hiển thị tổng thu/chi và chênh lệch.
-- Room lưu dữ liệu cục bộ; `seed.sql` chỉ tạo 7 danh mục. Theo yêu cầu demo, tài khoản `vu98` được nạp riêng 6 khoản chi (ăn trưa, xăng, sách, đồ dùng, phòng, ăn sáng), tổng 1.345.000 VND, một lần sau đăng ký/đăng nhập thành công. `DemoDataSeeder` lưu cờ `demoSeeded` trong Room nên mở lại/đăng nhập lại không nhân đôi và không tái tạo dòng đã xóa. Các tài khoản khác vẫn bắt đầu rỗng. Mật khẩu demo do người dùng chọn được nhập qua màn hình, không hardcode trong seed/app.
+- Room lưu dữ liệu cục bộ; `seed.sql` tạo 7 danh mục và tài khoản mẫu `vu98` (mật khẩu `11111111`) nếu chưa có. Seed chạy trong transaction khi mở database, dùng INSERT OR IGNORE để giữ ID, mật khẩu và dữ liệu hiện có. Theo yêu cầu demo, tài khoản `vu98` được nạp riêng 6 khoản chi (ăn trưa, xăng, sách, đồ dùng, phòng, ăn sáng), tổng 1.345.000 VND, một lần sau đăng ký/đăng nhập thành công. `DemoDataSeeder` lưu cờ `demoSeeded` trong Room nên mở lại/đăng nhập lại không nhân đôi và không tái tạo dòng đã xóa. Các tài khoản khác vẫn bắt đầu rỗng. Seed chứa salt và hash PBKDF2 của mật khẩu demo, không chứa mật khẩu dạng rõ. Tài khoản mẫu dùng để trình diễn; các tài khoản tự đăng ký lưu salt ngẫu nhiên riêng.
 - Biểu đồ cột tổng chi của 6 tháng đến tháng đã chọn, kèm số tiền từng tháng.
 - Giao diện tông tím, thẻ bo góc, biểu đồ vòng phân bổ khoản chi theo danh mục và thanh điều hướng Tổng quan / Giao dịch / Thống kê. Nút + mở biểu mẫu thêm giao dịch; chạm giao dịch để sửa và nút thùng rác để xóa có xác nhận.
 - Báo cáo đồ án hiện tại: [Word](docs/Bao_cao_Do_an_QLCT_Compose_MVVM_Room.docx) và [PDF](docs/Bao_cao_Do_an_QLCT_Compose_MVVM_Room.pdf), mô tả bản Compose–MVVM–Room, 9 use case, 12 sơ đồ và 8 ảnh giao diện thật. Nguồn sơ đồ PNG/SVG nằm trong `docs/diagrams/current/`; sinh báo cáo bằng `docs/build_final_report.py` (cần python-docx, matplotlib và Pillow). Bổ sung tên trường, khoa, lớp, giảng viên, năm học và xác nhận phân công thực tế trước khi nộp. Báo cáo Basic và đề cương cũ là tài liệu lịch sử.
@@ -68,3 +68,9 @@ python docs/tests/test_database.py
 ```
 
 `local.properties`, thư mục build, cache IDE, khóa ký và database trên thiết bị không được đưa lên Git. Không cần cài SQLite riêng để chạy ứng dụng Android.
+
+## Tài khoản và lưu dữ liệu
+
+Bảng tài khoản thật là `local_account`, liên kết với `transactions.user_id` bằng khóa ngoại. Không cần tạo thêm bảng account trùng chức năng. Room lưu cả tài khoản và giao dịch vào `qlct.db` trong bộ nhớ ứng dụng, giữ dữ liệu qua đóng/mở app và đăng xuất. Phiên đăng nhập chỉ ở RAM nên mở lại có thể cần đăng nhập, nhưng bản ghi vẫn còn. Dữ liệu cục bộ không tự đồng bộ giữa thiết bị, không nằm trên GitHub và bị xóa nếu gỡ app hoặc Clear Data.
+
+Cài bản cập nhật đè lên app hiện tại để giữ database. Tài khoản mẫu mới: `vu98` / `11111111`. Nếu `vu98` đã tồn tại với mật khẩu khác, seed không tự reset mật khẩu đó. Dùng mật khẩu đã đăng ký trên thiết bị hoặc đăng ký tài khoản khác; không xóa dữ liệu để xử lý lỗi đăng nhập.
