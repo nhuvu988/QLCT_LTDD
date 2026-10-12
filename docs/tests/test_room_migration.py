@@ -9,12 +9,12 @@ import sqlite3
 from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
-source = (root / 'app/src/main/java/com/example/qlct/data/ExpenseDatabase.kt').read_text(encoding='utf-8')
+source = (root / 'app/src/main/java/com/example/qlct/model/database/ExpenseDatabase.kt').read_text(encoding='utf-8')
 migration = source.split('override fun migrate(db: SupportSQLiteDatabase) {', 1)[1].split('\n            }', 1)[0]
 statements = re.findall(r'db\.execSQL\("([^"]+)"\)', migration)
 assert len(statements) == 13, 'Review parser when migration implementation changes'
 legacy = (root / 'docs/tests/schema.sql').read_text(encoding='utf-8')
-room = json.loads((root / 'app/schemas/com.example.qlct.data.ExpenseDatabase/2.json').read_text(encoding='utf-8'))['database']
+room = json.loads((root / 'app/schemas/com.example.qlct.model.database.ExpenseDatabase/2.json').read_text(encoding='utf-8'))['database']
 
 for empty in (False, True):
     with sqlite3.connect(':memory:') as db:

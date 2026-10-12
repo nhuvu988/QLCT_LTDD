@@ -17,7 +17,7 @@
 - Thêm, sửa, xóa giao dịch thu/chi.
 - Đăng nhập/đăng ký cục bộ, nhiều tài khoản với giao dịch tách riêng theo `user_id`. Tài khoản mới có 0 giao dịch, tổng thu/chi bằng 0. Nút Đăng xuất cố định ở đầu màn hình và hoạt động trên cả ba tab. Tên đăng nhập 3–32 ký tự không dấu/số/_, mật khẩu 8–128 ký tự. Mật khẩu lưu dưới dạng PBKDF2 với salt ngẫu nhiên, không lưu dạng rõ. Phiên chỉ ở bộ nhớ; chưa có cloud hoặc khôi phục mật khẩu.
 - Lọc theo loại giao dịch, chọn tháng hoặc toàn bộ thời gian; hiển thị tổng thu/chi và chênh lệch.
-- Room lưu dữ liệu cục bộ; `seed.sql` tạo 7 danh mục và tài khoản mẫu `vu98` (mật khẩu `11111111`) nếu chưa có. Seed chạy trong transaction khi mở database, dùng INSERT OR IGNORE để giữ ID, mật khẩu và dữ liệu hiện có. Theo yêu cầu demo, tài khoản `vu98` được nạp riêng 6 khoản chi (ăn trưa, xăng, sách, đồ dùng, phòng, ăn sáng), tổng 1.345.000 VND, một lần sau đăng ký/đăng nhập thành công. `DemoDataSeeder` lưu cờ `demoSeeded` trong Room nên mở lại/đăng nhập lại không nhân đôi và không tái tạo dòng đã xóa. Các tài khoản khác vẫn bắt đầu rỗng. Seed chứa salt và hash PBKDF2 của mật khẩu demo, không chứa mật khẩu dạng rõ. Tài khoản mẫu dùng để trình diễn; các tài khoản tự đăng ký lưu salt ngẫu nhiên riêng.
+- Room lưu dữ liệu cục bộ; `DatabaseInitializer` dùng Room DAO tạo 7 danh mục và tài khoản mẫu `vu98` (mật khẩu `11111111`) nếu chưa có. Seed chạy trong Room transaction trước thao tác xác thực, dùng @Insert(IGNORE) để giữ ID, mật khẩu và dữ liệu hiện có. Theo yêu cầu demo, tài khoản `vu98` được nạp riêng 6 khoản chi (ăn trưa, xăng, sách, đồ dùng, phòng, ăn sáng), tổng 1.345.000 VND, một lần sau đăng ký/đăng nhập thành công. `DemoDataSeeder` lưu cờ `demoSeeded` trong Room nên mở lại/đăng nhập lại không nhân đôi và không tái tạo dòng đã xóa. Các tài khoản khác vẫn bắt đầu rỗng. Seed chứa salt và hash PBKDF2 của mật khẩu demo, không chứa mật khẩu dạng rõ. Tài khoản mẫu dùng để trình diễn; các tài khoản tự đăng ký lưu salt ngẫu nhiên riêng.
 - Biểu đồ cột tổng chi của 6 tháng đến tháng đã chọn, kèm số tiền từng tháng.
 - Giao diện tông tím, thẻ bo góc, biểu đồ vòng phân bổ khoản chi theo danh mục và thanh điều hướng Tổng quan / Giao dịch / Thống kê. Nút + mở biểu mẫu thêm giao dịch; chạm giao dịch để sửa và nút thùng rác để xóa có xác nhận.
 - Báo cáo đồ án hiện tại: [Word](docs/Bao_cao_Do_an_QLCT_Compose_MVVM_Room.docx) và [PDF](docs/Bao_cao_Do_an_QLCT_Compose_MVVM_Room.pdf), mô tả bản Compose–MVVM–Room, 9 use case, 12 sơ đồ và 8 ảnh giao diện thật. Nguồn sơ đồ PNG/SVG nằm trong `docs/diagrams/current/`; sinh báo cáo bằng `docs/build_final_report.py` (cần python-docx, matplotlib và Pillow). Bổ sung tên trường, khoa, lớp, giảng viên, năm học và xác nhận phân công thực tế trước khi nộp. Báo cáo Basic và đề cương cũ là tài liệu lịch sử.
@@ -38,6 +38,40 @@ Database `qlct.db` phiên bản 6 có migration 1→2→3→4→5→6. Bảng `b
 Số tiền phải là số nguyên VND từ 1 đến 999.999.999.999; không chấp nhận số âm hoặc số 0. Loại Thu/Chi quyết định dấu khi hiển thị và tổng hợp, số tiền lưu luôn dương. Khi nhấn Lưu với dữ liệu sai, ô Số tiền hiện lỗi cụ thể và giữ biểu mẫu; quy tắc được kiểm tra lại trong repository cho cả thêm và sửa.
 
 Biểu đồ chỉ cộng khoản chi, độc lập với bộ lọc Thu/Chi của danh sách. Tổng quan phụ thuộc khoảng thời gian đã chọn và cũng độc lập với bộ lọc loại giao dịch.
+
+## Lưu trữ thống nhất bằng Room / SQLite
+
+Mọi thao tác dữ liệu khi chạy ứng dụng (tài khoản, danh mục, giao dịch, ngân sách và dữ liệu mẫu) đi qua Room DAO. `DatabaseInitializer` nạp danh mục/tài khoản bằng `@Insert(IGNORE)` trong `withTransaction` trước khi kiểm tra tài khoản, đăng nhập hoặc đăng ký. `DemoDataSeeder` thêm giao dịch và cập nhật cờ hoàn tất qua DAO trong cùng một transaction. Không nạp seed bằng callback `execSQL` hoặc truy cập `openHelper` trong nghiệp vụ.
+
+`app/src/main/assets/seed.sql` là bản SQL tham khảo cho báo cáo và kiểm tra SQLite trên máy tính, không được ứng dụng thực thi. Khi sửa dữ liệu mặc định, sửa `DatabaseInitializer.kt` và cập nhật bản tham khảo này. SQL nâng cấp schema vẫn nằm trong các `Migration` của Room; đó là một phần của Room, không phải database thứ hai. Database vẫn là `qlct.db`, version 6, không đổi schema hoặc xóa dữ liệu cũ. Phiên đăng nhập/UI state là trạng thái tạm thời như trước.
+
+## Cấu trúc source theo MVVM
+
+Source nằm trong `app/src/main/java/com/example/qlct/`:
+
+```text
+model/
+  entity/       Các bản ghi Room và dữ liệu giao dịch
+  dao/          AccountDao, ExpenseDao
+  database/     ExpenseDatabase, seed và migration
+  repository/   AuthRepository, ExpenseRepository
+  validation/   Kiểm tra tài khoản và số tiền
+  summary/      Thống kê, ngân sách và tìm kiếm (Kotlin thuần)
+view/
+  auth/         AuthScreen
+  expense/      ExpenseScreen, TransactionEditor, BudgetComponents
+  components/   Header, card, biểu đồ, giao dịch, thanh điều hướng
+  theme/        Màu và QlctTheme
+viewmodel/
+  AuthViewModel.kt
+  ExpenseViewModel.kt
+  state/        AuthUiState, ExpenseUiState
+MainActivity.kt  Khởi tạo và kết nối các thành phần
+```
+
+View nhận sự kiện người dùng và quan sát StateFlow; ViewModel xử lý sự kiện, gọi Repository và cập nhật UI state; Model chứa dữ liệu, Room và tính toán nghiệp vụ. `model` không phụ thuộc `view`/`viewmodel`. Các component Compose dùng chung được tách khỏi màn hình chính; biểu mẫu giao dịch có file riêng. Tên package dùng chữ thường theo quy ước Kotlin.
+
+Lần tổ chức lại này giữ nguyên applicationId, database `qlct.db`, schema version 6, migration, seed và logic chức năng. Lịch sử schema chuyển sang `app/schemas/com.example.qlct.model.database.ExpenseDatabase/` theo tên lớp mới. Không cần gỡ app hoặc xóa dữ liệu khi cập nhật. Các báo cáo Word/PDF cũ là snapshot trước lần tổ chức source này; dùng cấu trúc trên khi cập nhật báo cáo.
 
 ## Chạy dự án
 
@@ -92,3 +126,10 @@ python docs/tests/test_budget_migration.py
 ```
 
 Unit test mới: `BudgetAndSearchTest` kiểm tra mốc cảnh báo, tìm kiếm không dấu, kết hợp bộ lọc và tính lại tổng chi. Instrumentation `MonthlyBudgetTest` kiểm tra lưu/mở lại, cập nhật, xóa, validation và phân tách tài khoản/tháng; cần thiết bị Android để chạy.
+
+## UI state và luồng dữ liệu một chiều
+
+- `AuthViewModel.uiState: StateFlow<AuthUiState>` cung cấp loading, trạng thái đăng nhập/đăng ký, busy và lỗi.
+- `ExpenseViewModel.uiState: StateFlow<ExpenseUiState>` là nguồn trạng thái duy nhất cho màn hình chi tiêu: dữ liệu, bộ lọc, ngân sách, loading, busy, actionError và completedActions.
+- View thu thập bằng `collectAsStateWithLifecycle()`; gửi thao tác qua các hàm ViewModel. Các MutableStateFlow đều private, giao diện không ghi trực tiếp state.
+- Dữ liệu lâu dài nằm trong Room; bộ lọc dùng SavedStateHandle; trạng thái biểu mẫu/dialog tạm thời dùng Compose state. UI state không thay thế database.

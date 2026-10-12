@@ -6,7 +6,7 @@ import sqlite3
 import tempfile
 
 root = Path(__file__).resolve().parents[2]
-schema = json.loads((root / 'app/schemas/com.example.qlct.data.ExpenseDatabase/5.json').read_text())['database']
+schema = json.loads((root / 'app/schemas/com.example.qlct.model.database.ExpenseDatabase/5.json').read_text())['database']
 seed = (root / 'app/src/main/assets/seed.sql').read_text(encoding='utf-8')
 
 with tempfile.TemporaryDirectory() as folder:

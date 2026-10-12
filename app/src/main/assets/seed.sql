@@ -1,3 +1,7 @@
+-- Reference SQL for documentation and host SQLite checks only.
+-- The Android app seeds through DatabaseInitializer and Room DAOs;
+-- it does not execute this file. Keep values aligned with DatabaseInitializer.
+
 -- Shared categories. Reapplying this seed preserves existing records.
 INSERT OR IGNORE INTO categories (id, name)
 VALUES

@@ -1,0 +1,16 @@
+MVVM source refactor validation - 2026-10-12
+
+BUILD SUCCESSFUL: assembleDebug testDebugUnitTest assembleDebugAndroidTest
+Build options: --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process
+
+com.example.qlct.model.summary.BudgetAndSearchTest: 4 passed
+com.example.qlct.model.summary.ExpenseSummaryTest: 3 passed
+com.example.qlct.model.validation.AccountValidatorTest: 2 passed
+com.example.qlct.model.validation.AmountValidatorTest: 4 passed
+
+Total: 13 unit tests passed.
+Host SQLite checks passed: test_room_migration.py, test_budget_migration.py, test_account_seed.py.
+All exported Room schema versions and identity hashes match pre-refactor HEAD.
+seed.sql, applicationId, database version and manifest are unchanged.
+Android instrumentation APK compiled; tests NOT run on device (adb lists no devices).
+Debug APK: app/build/outputs/apk/debug/app-debug.apk

@@ -2,10 +2,10 @@
 from pathlib import Path
 import json, re, sqlite3, tempfile
 root=Path(__file__).resolve().parents[2]
-schemas=root/'app/schemas/com.example.qlct.data.ExpenseDatabase'
+schemas=root/'app/schemas/com.example.qlct.model.database.ExpenseDatabase'
 v5=json.loads((schemas/'5.json').read_text())['database']
 v6=json.loads((schemas/'6.json').read_text())['database']
-source=(root/'app/src/main/java/com/example/qlct/data/ExpenseDatabase.kt').read_text(encoding='utf-8')
+source=(root/'app/src/main/java/com/example/qlct/model/database/ExpenseDatabase.kt').read_text(encoding='utf-8')
 block=source.split('val MIGRATION_5_6 =',1)[1].split('fun getInstance',1)[0]
 statements=re.findall(r'db.execSQL\("([^"\n]+)"\)',block)
 assert statements
