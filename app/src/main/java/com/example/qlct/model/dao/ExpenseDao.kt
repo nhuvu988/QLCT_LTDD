@@ -4,7 +4,6 @@ import androidx.room.Dao
 import androidx.room.OnConflictStrategy
 import androidx.room.Insert
 import androidx.room.Query
-import androidx.room.Update
 import androidx.room.Upsert
 import com.example.qlct.model.entity.Category
 import com.example.qlct.model.entity.MonthlyBudget
@@ -35,15 +34,10 @@ interface ExpenseDao {
     @Insert
     suspend fun insert(transaction: TransactionEntity): Long
 
-    @Update
-    suspend fun update(transaction: TransactionEntity): Int
-
     @Query("UPDATE transactions SET type=:type, amount=:amount, category_id=:categoryId, date=:date, note=:note WHERE id=:id AND user_id IS :userId")
     suspend fun updateOwned(id: Long, userId: Int?, type: String, amount: Long, categoryId: Long, date: String, note: String): Int
 
     @Query("DELETE FROM transactions WHERE id=:id AND user_id IS :userId")
     suspend fun deleteOwned(id: Long, userId: Int?): Int
 
-    @Query("DELETE FROM transactions WHERE id = :id")
-    suspend fun delete(id: Long): Int
 }

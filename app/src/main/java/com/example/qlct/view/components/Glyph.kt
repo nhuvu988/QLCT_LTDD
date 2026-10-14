@@ -18,6 +18,9 @@ internal fun Glyph(kind: String, color: Color, modifier: Modifier = Modifier) {
         val w = size.width; val h = size.height; val stroke = 1.7.dp.toPx()
         fun line(x: Float, y: Float, xx: Float, yy: Float) = drawLine(color, Offset(w*x, h*y), Offset(w*xx, h*yy), stroke, StrokeCap.Round)
         when (kind) {
+            "edit" -> { line(.18f,.72f,.7f,.15f); line(.7f,.15f,.86f,.3f); line(.86f,.3f,.34f,.87f); line(.34f,.87f,.14f,.9f); line(.14f,.9f,.18f,.72f) }
+            "calendar" -> { drawRoundRect(color, Offset(w*.1f,h*.2f), Size(w*.8f,h*.7f), androidx.compose.ui.geometry.CornerRadius(w*.06f), style = Stroke(stroke)); line(.1f,.4f,.9f,.4f); line(.3f,.1f,.3f,.28f); line(.7f,.1f,.7f,.28f); repeat(3) { x -> repeat(2) { y -> drawCircle(color,w*.025f,Offset(w*(.3f+x*.2f),h*(.56f+y*.18f))) } } }
+
             "chart" -> { line(.2f,.85f,.2f,.55f); line(.5f,.85f,.5f,.32f); line(.8f,.85f,.8f,.1f) }
             "home" -> { line(.1f,.45f,.5f,.1f); line(.5f,.1f,.9f,.45f); line(.2f,.4f,.2f,.88f); line(.2f,.88f,.8f,.88f); line(.8f,.88f,.8f,.4f); line(.5f,.88f,.5f,.6f) }
             "food" -> { line(.25f,.1f,.25f,.9f); line(.1f,.1f,.1f,.35f); line(.4f,.1f,.4f,.35f); line(.1f,.35f,.4f,.35f); drawOval(color, Offset(w*.65f,h*.1f), Size(w*.25f,h*.38f), style = Stroke(stroke)); line(.78f,.48f,.78f,.9f) }

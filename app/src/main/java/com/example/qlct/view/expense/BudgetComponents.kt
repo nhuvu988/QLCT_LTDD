@@ -22,10 +22,11 @@ import java.time.YearMonth
 fun MonthlyBudgetCard(month: YearMonth, status: BudgetStatus, busy: Boolean, onEdit: () -> Unit) {
     DashboardCard("Ngân sách tháng ${month.monthValue}/${month.year}") {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Luôn tính riêng tháng này, kể cả khi xem toàn bộ giao dịch.", style = MaterialTheme.typography.bodySmall)
-            Text("Đã chi: ${formatMoney(status.spent)}")
+            Text("Đã chi: ${formatMoney(status.spent)}", style = MaterialTheme.typography.titleMedium)
             if (status.limit == null) {
                 Text("Chưa đặt ngân sách cho tháng này.")
+                LinearProgressIndicator(progress = { 0f }, modifier = Modifier.fillMaxWidth(),
+                    trackColor = MaterialTheme.colorScheme.outlineVariant)
             } else {
                 Text("Hạn mức: ${formatMoney(status.limit)}")
                 val color = when (status.level) {

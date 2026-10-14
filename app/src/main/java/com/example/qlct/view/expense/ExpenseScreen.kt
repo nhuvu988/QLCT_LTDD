@@ -17,10 +17,10 @@ import com.example.qlct.view.components.BottomNavigation
 import com.example.qlct.view.components.CategoryChart
 import com.example.qlct.view.components.DashboardCard
 import com.example.qlct.view.components.DashboardHeader
+import com.example.qlct.view.components.ExpenseCalendar
 import com.example.qlct.view.components.SpendingChart
 import com.example.qlct.view.components.TransactionTile
 import com.example.qlct.view.theme.Muted
-import com.example.qlct.view.theme.Purple
 import com.example.qlct.viewmodel.ExpenseViewModel
 
 
@@ -49,27 +49,35 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
     val deleting = state.summary.visible.find { it.id == deletingId }
 
     var tab by rememberSaveable { mutableIntStateOf(0) }
-    val displayRows = if (tab == 1) state.searchResults else state.summary.visible
+    var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(state.month, state.monthOnly) { selectedDate = null }
+    val displayRows = if (tab == 1) state.searchResults.filter { selectedDate == null || it.date == selectedDate } else state.summary.visible
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
     LaunchedEffect(tab) { listState.scrollToItem(0) }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            Surface(color = Purple, contentColor = androidx.compose.ui.graphics.Color.White) {
+            Surface(color = MaterialTheme.colorScheme.surface, contentColor = MaterialTheme.colorScheme.onSurface) {
                 Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 16.dp),
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text("Tài khoản: $username", modifier = Modifier.weight(1f),
-                        maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    Column(Modifier.weight(1f).padding(vertical = 12.dp)) {
+                        Text(when (tab) { 1 -> "Lịch giao dịch"; 2 -> "Báo cáo"; 3 -> "Ngân sách"; else -> "Sổ thu chi" },
+                            style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                        Text(username, style = MaterialTheme.typography.bodySmall, color = Muted)
+                    }
                     TextButton(onClick = onLogout, enabled = !busy,
-                        colors = ButtonDefaults.textButtonColors(contentColor = androidx.compose.ui.graphics.Color.White)) {
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.primary)) {
                         Text("Đăng xuất", fontWeight = FontWeight.Bold)
                     }
                 }
             }
         },
         bottomBar = {
-            BottomNavigation(tab, { tab = it }, {
+            BottomNavigation(tab, {
+                tab = it
+                if (it == 3) { model.setMonthOnly(true); model.setType("ALL") }
+            }, {
                 editingId = null; model.clearError(); editorOpen = true
             }, !state.loading && state.loadError == null && state.categories.isNotEmpty() && !busy)
         }
@@ -87,9 +95,9 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 item {
-                    DashboardHeader(state, { model.changeMonth(-1) }, { model.changeMonth(1) }, model::setMonthOnly)
+                    DashboardHeader(state, { model.changeMonth(-1) }, { model.changeMonth(1) }, model::setMonthOnly, allowAllTime = tab != 3)
                 }
-                if (tab != 1) {
+                if (tab == 0 || tab == 3) {
                     item {
                         Box(Modifier.padding(horizontal = 16.dp)) {
                             MonthlyBudgetCard(state.month, state.budget, busy) {
@@ -99,14 +107,41 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
                             }
                         }
                     }
+                }
+                if (tab == 0 || tab == 2) {
                     item { Box(Modifier.padding(horizontal = 16.dp)) { CategoryChart(state.summary, detailed = tab == 2) } }
                     item { Box(Modifier.padding(horizontal = 16.dp)) { SpendingChart(state.summary.chart, detailed = tab == 2) } }
                 }
-                if (tab != 2) {
+                if (tab == 3) {
+                    item {
+                        Box(Modifier.padding(horizontal = 16.dp)) {
+                            DashboardCard("Chi tiêu trong tháng") {
+                                state.categories.forEach { category ->
+                                    val amount = state.summary.categoryExpenses.find { it.id == category.id }?.amount ?: 0L
+                                    Row(Modifier.fillMaxWidth().padding(vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                                        com.example.qlct.view.components.Glyph(when (category.id) { 1L -> "food"; 2L -> "car"; 4L -> "bag"; 5L -> "home"; else -> "wallet" },
+                                            com.example.qlct.view.components.categoryColor(category.id), Modifier.size(24.dp))
+                                        Text(category.name, Modifier.weight(1f).padding(horizontal = 12.dp))
+                                        Text(formatMoney(amount), style = MaterialTheme.typography.bodySmall)
+                                    }
+                                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                                }
+                            }
+                        }
+                    }
+                }
+                if (tab == 1 && state.monthOnly) {
+                    item {
+                        Box(Modifier.padding(horizontal = 16.dp)) {
+                            ExpenseCalendar(state.month, state.searchResults, selectedDate) { selectedDate = it }
+                        }
+                    }
+                }
+                if (tab == 0 || tab == 1) {
                     item {
                         Column(Modifier.padding(horizontal = 20.dp)) {
                             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                                Text(if (tab == 0) "Giao dịch gần đây" else "Lịch sử giao dịch", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                                Text(if (tab == 0) "Giao dịch gần đây" else if (selectedDate == null) "Lịch sử giao dịch" else "Giao dịch ngày ${java.time.LocalDate.parse(selectedDate).format(java.time.format.DateTimeFormatter.ofPattern("dd/MM"))}", fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                                 if (tab == 0) TextButton(onClick = { tab = 1 }) { Text("Xem tất cả", fontSize = 11.sp) }
                             }
                             if (tab == 1) OutlinedTextField(
@@ -126,7 +161,7 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
                     if (displayRows.isEmpty()) item {
                         Box(Modifier.padding(horizontal = 16.dp)) {
                             DashboardCard(if (tab == 1 && state.query.isNotBlank()) "Không tìm thấy giao dịch" else "Chưa có giao dịch") {
-                                Text(if (tab == 1 && state.query.isNotBlank()) "Thử từ khóa khác hoặc thay đổi bộ lọc tháng, Thu/Chi." else "Nhấn nút + bên dưới để ghi lại khoản thu hoặc chi của bạn.", color = Muted, style = MaterialTheme.typography.bodySmall)
+                                Text(if (tab == 1 && state.query.isNotBlank()) "Thử từ khóa khác hoặc thay đổi bộ lọc tháng, Thu/Chi." else "Chọn Nhập vào bên dưới để ghi lại khoản thu hoặc chi của bạn.", color = Muted, style = MaterialTheme.typography.bodySmall)
                             }
                         }
                     }

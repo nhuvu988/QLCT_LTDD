@@ -37,3 +37,6 @@ Room v5: user_id nullable FK tới local_account.id (legacy chưa gán dùng NUL
 2026-10-07: Room v6, bảng budgets PK(user_id,month), FK local_account.id. Thêm ngân sách tháng tại Tổng quan/Thống kê, cảnh báo 80%/100%/vượt; tìm ghi chú/danh mục không dấu tại Giao dịch. Tìm kiếm không ảnh hưởng tổng/biểu đồ/ngân sách. Phụ lục Word: Phu_luc_Ngan_sach_Tim_kiem.docx. Không destructive migration. Kiểm thử và giới hạn xem budget_search_validation.txt.
 
 2026-10-14: Merge origin/main; runtime seed now uses DatabaseInitializer and Room DAOs. seed.sql is reference only; new demo account uses vu98/11111111, existing passwords remain unchanged.
+
+2026-10-14: Removed obsolete seed.sql asset and SQL-reference-only test. Runtime defaults remain in DatabaseInitializer / DemoDataSeeder. Updated host SQLite tests to use initializer values or independent migration fixtures. Removed unused resource, DAO methods and dependencies. Earlier entries and report snapshots document historical implementations.
+Validation: 4 host SQLite scripts, 16 unit tests and 8 Android instrumentation tests passed (isolated com.example.qlct.cleanupcheck). Lint: 0 errors / 13 warnings. Main debug APK built; no seed.sql asset packaged.

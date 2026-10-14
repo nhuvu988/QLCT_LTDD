@@ -16,7 +16,9 @@ with tempfile.TemporaryDirectory() as folder:
     for entity in v5['entities']:
         db.execute(entity['createSql'].replace('${TABLE_NAME}',entity['tableName']))
         for index in entity['indices']: db.execute(index['createSql'].replace('${TABLE_NAME}',entity['tableName']))
-    db.executescript((root/'app/src/main/assets/seed.sql').read_text(encoding='utf-8'))
+    # Independent migration fixtures; production defaults are initialized through Room.
+    db.execute("INSERT INTO categories(id,name) VALUES (1,'Food')")
+    db.execute("INSERT INTO local_account(username,salt,passwordHash,demoSeeded) VALUES ('vu98','s','h',0)")
     owner=db.execute("SELECT id FROM local_account WHERE username='vu98'").fetchone()[0]
     db.execute("INSERT INTO local_account(username,salt,passwordHash,demoSeeded) VALUES ('second','s','h',0)")
     other=db.execute("SELECT id FROM local_account WHERE username='second'").fetchone()[0]

@@ -117,9 +117,7 @@ class ExpenseUiStateTest {
         override suspend fun deleteBudget(userId: Int, month: String) { budgets.value = emptyList() }
         override suspend fun insertCategoriesIfMissing(categories: List<Category>) = Unit
         override suspend fun insert(transaction: TransactionEntity): Long = error("Not used")
-        override suspend fun update(transaction: TransactionEntity): Int = error("Not used")
         override suspend fun updateOwned(id: Long, userId: Int?, type: String, amount: Long, categoryId: Long, date: String, note: String): Int = error("Not used")
         override suspend fun deleteOwned(id: Long, userId: Int?): Int = error("Not used")
-        override suspend fun delete(id: Long): Int = error("Not used")
     }
 }

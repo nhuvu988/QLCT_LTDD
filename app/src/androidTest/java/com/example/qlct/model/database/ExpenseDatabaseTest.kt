@@ -61,7 +61,7 @@ class ExpenseDatabaseTest {
                 assertEquals("Sửa", row.note)
                 assertEquals("INCOME", row.type)
                 assertEquals(22222L, row.amount)
-                db.dao().delete(row.id)
+                ExpenseRepository(db.dao()).delete(row.id)
             }
             open().useDb { assertTrue(it.dao().observeTransactions().first().isEmpty()) }
         } finally { context.deleteDatabase(name) }
