@@ -1,0 +1,11 @@
+Room-only runtime persistence validation - 2026-10-12
+BUILD SUCCESSFUL: assembleDebug testDebugUnitTest assembleDebugAndroidTest
+Options: --max-workers=2 -Pkotlin.compiler.execution.strategy=in-process
+13 unit tests passed.
+Host SQLite checks passed: test_room_migration.py, test_budget_migration.py, test_account_seed.py, test_room_seed_reference.py.
+All exported Room schemas/identity hashes match the previous database version.
+Runtime app code has no openHelper/rawQuery or SQL seed-file execution.
+Direct execSQL remains only in Room migrations for legacy schema upgrades.
+Android initializer/concurrency/rollback and persistence tests compiled, NOT executed on a device.
+No database was cleared or app uninstalled.
+APK: app/build/outputs/apk/debug/app-debug.apk

@@ -1,27 +1,24 @@
 package com.example.qlct
 
+import com.example.qlct.view.theme.QlctTheme
+import androidx.compose.runtime.getValue
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.lightColorScheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.ui.graphics.Color
-import androidx.core.view.WindowCompat
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.qlct.data.ExpenseDatabase
-import com.example.qlct.data.ExpenseRepository
-import com.example.qlct.ui.ExpenseScreen
-import com.example.qlct.ui.ExpenseViewModel
-import com.example.qlct.data.AuthRepository
-import com.example.qlct.data.DemoDataSeeder
-import com.example.qlct.ui.AuthViewModel
-import com.example.qlct.ui.AuthScreen
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.qlct.model.database.DatabaseInitializer
+import com.example.qlct.model.database.DemoDataSeeder
+import com.example.qlct.model.database.ExpenseDatabase
+import com.example.qlct.model.repository.AuthRepository
+import com.example.qlct.model.repository.ExpenseRepository
+import com.example.qlct.view.auth.AuthScreen
+import com.example.qlct.view.expense.ExpenseScreen
+import com.example.qlct.viewmodel.AuthViewModel
+import com.example.qlct.viewmodel.ExpenseViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -29,14 +26,15 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         val database = ExpenseDatabase.getInstance(applicationContext)
-        val authRepository = AuthRepository(database.accountDao(), DemoDataSeeder(database))
+        val authRepository = AuthRepository(
+            dao = database.accountDao(),
+            demoSeeder = DemoDataSeeder(database),
+            initializer = DatabaseInitializer(database)
+        )
         setContent {
-            MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else
-                lightColorScheme(primary = Color(0xFF7560C6), secondary = Color(0xFF9C8BD9),
-                    background = Color(0xFFF6F5FA), surface = Color.White,
-                    surfaceVariant = Color(0xFFF0EDF8), onSurface = Color(0xFF29263A))) {
+            QlctTheme {
                 val auth: AuthViewModel = viewModel(factory = AuthViewModel.factory(authRepository))
-                val authState by auth.state.collectAsStateWithLifecycle()
+                val authState by auth.uiState.collectAsStateWithLifecycle()
                 if (authState.username == null) AuthScreen(auth)
                 else {
                     key(authState.userId) {

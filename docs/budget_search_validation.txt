@@ -1,0 +1,9 @@
+﻿Budget and search validation - 2026-10-07
+PASS: :app:assembleDebug (APK built).
+PASS: :app:testDebugUnitTest - 13 tests, 0 failures, including 4 new budget/search tests.
+PASS: :app:assembleDebugAndroidTest - instrumentation APK compiles.
+PASS: :app:lintDebug - 0 errors, 15 warnings (dependency versions, extraction rules, unused resource).
+PASS: python docs/tests/test_budget_migration.py - actual v5-v6 SQL preserves accounts and transactions; budget schema, composite PK, FK and persistence validated.
+Android instrumentation/UI tests NOT executed: adb devices reports no connected device.
+Word supplement includes use case, flows, ERD and class/component diagrams, not runtime screenshots.
+Manual follow-up: set/edit/delete budget; change month/account; add/edit/delete expense; search with keyboard; rotate screen.
