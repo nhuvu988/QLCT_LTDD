@@ -16,6 +16,9 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class DemoDataSeederTest {
+    /**
+     * Kiểm tra nạp demo trên database có sẵn giữ nguyên tài khoản, mật khẩu và giao dịch cá nhân.
+     */
     @Test fun seedExistingDatabasePreservesAccountPasswordAndOwnedRows() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val name = "seed-existing-account-test.db"
@@ -40,10 +43,16 @@ class DemoDataSeederTest {
         } finally { db.close(); context.deleteDatabase(name) }
     }
 
+    /**
+     * Kiểm tra demo không nạp trùng khi mở lại và tài khoản khác vẫn không có dữ liệu mẫu.
+     */
     @Test fun demoPersistsWithoutDuplicatesAndOtherAccountsStayEmpty() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val name = "demo-seeder-test.db"
         context.deleteDatabase(name)
+        /**
+         * Mở lại cùng database kiểm thử để kiểm tra dữ liệu được lưu qua các lần đóng/mở.
+         */
         fun open() = Room.databaseBuilder(context, ExpenseDatabase::class.java, name).build()
         var db = open()
         try {

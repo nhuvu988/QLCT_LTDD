@@ -33,12 +33,17 @@ import java.time.format.DateTimeFormatter
 
 private val dateFormat = DateTimeFormatter.ofPattern("dd/MM/yyyy")
 
+/**
+ * Biểu mẫu thêm/sửa giao dịch: existing = null là thêm mới, ngược lại điền dữ liệu cũ.
+ * Kiểm tra số tiền và danh mục trước khi gửi TransactionEntity qua onSave; busy khóa thao tác.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun TransactionEditor(
     existing: TransactionRow?, categories: List<Category>, busy: Boolean, actionError: String?,
     onDismiss: () -> Unit, onSave: (TransactionEntity) -> Unit
 ) {
+    // Điền dữ liệu cũ khi sửa; giao dịch mới mặc định là khoản chi, ngày hôm nay và danh mục đầu tiên.
     var type by rememberSaveable { mutableStateOf(existing?.type ?: "EXPENSE") }
     var amount by rememberSaveable { mutableStateOf(existing?.amount?.toString() ?: "") }
     var categoryId by rememberSaveable { mutableLongStateOf(existing?.categoryId ?: categories.firstOrNull()?.id ?: 0L) }
@@ -46,6 +51,7 @@ internal fun TransactionEditor(
     var note by rememberSaveable { mutableStateOf(existing?.note ?: "") }
     var validation by rememberSaveable { mutableStateOf<String?>(null) }
     var amountChecked by rememberSaveable { mutableStateOf(false) }
+    // Chỉ hiện lỗi số tiền sau lần nhấn lưu đầu tiên, sau đó cập nhật lỗi ngay khi người dùng nhập lại.
     val amountError = if (amountChecked) AmountValidator.errorForInput(amount) else null
     var dateOpen by rememberSaveable { mutableStateOf(false) }
 
@@ -91,6 +97,7 @@ internal fun TransactionEditor(
                         isError = amountError != null, supportingText = { amountError?.let { Text(it) } },
                         modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp))
                     Text("Danh mục", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    // Chia danh mục thành từng hàng 3 ô; Spacer cuối hàng giúp các ô còn lại giữ đúng chiều rộng.
                     categories.chunked(3).forEach { row ->
                         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             row.forEach { category ->
@@ -115,6 +122,7 @@ internal fun TransactionEditor(
                     (validation ?: actionError)?.let { Text(it, color = MaterialTheme.colorScheme.error) }
                 }
                 Button(enabled = !busy && categories.isNotEmpty(), onClick = {
+                    // Bàn phím số chỉ hỗ trợ nhập liệu; vẫn phải kiểm tra chuỗi và giới hạn số tiền trước khi tạo bản ghi.
                     amountChecked = true
                     validation = null
                     val value = amount.trim().toLongOrNull()
@@ -131,6 +139,7 @@ internal fun TransactionEditor(
         }
     }
     if (dateOpen) {
+        // Material DatePicker dùng mốc UTC; đổi cả hai chiều bằng UTC để không bị lệch ngày theo múi giờ thiết bị.
         val picker = rememberDatePickerState(initialSelectedDateMillis = LocalDate.parse(date).atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli())
         DatePickerDialog(onDismissRequest = { dateOpen = false },
             confirmButton = { TextButton(onClick = {

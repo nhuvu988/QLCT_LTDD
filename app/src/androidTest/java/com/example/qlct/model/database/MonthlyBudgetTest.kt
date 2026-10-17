@@ -15,10 +15,16 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class MonthlyBudgetTest {
+    /**
+     * Kiểm tra lưu ngân sách qua mở lại, tách theo tài khoản/tháng và các thao tác cập nhật, xóa, validation.
+     */
     @Test fun budgetsPersistAndAreIsolatedByAccountAndMonth() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val name = "monthly-budget-test.db"
         context.deleteDatabase(name)
+        /**
+         * Mở lại cùng database kiểm thử để kiểm tra dữ liệu được lưu qua các lần đóng/mở.
+         */
         fun open() = Room.databaseBuilder(context,ExpenseDatabase::class.java,name).build()
         var db = open()
         try {

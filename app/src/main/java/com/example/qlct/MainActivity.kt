@@ -21,8 +21,13 @@ import com.example.qlct.viewmodel.AuthViewModel
 import com.example.qlct.viewmodel.ExpenseViewModel
 
 class MainActivity : ComponentActivity() {
+    /**
+     * Khởi tạo Room và các Repository, sau đó dựng giao diện Compose.
+     * Chưa đăng nhập thì mở AuthScreen; đã đăng nhập thì mở ExpenseScreen theo userId.
+     */
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Cho phép vẽ sát mép màn hình; các màn hình Compose tự chừa khoảng trống cho thanh hệ thống.
         enableEdgeToEdge()
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         val database = ExpenseDatabase.getInstance(applicationContext)
@@ -34,9 +39,12 @@ class MainActivity : ComponentActivity() {
         setContent {
             QlctTheme {
                 val auth: AuthViewModel = viewModel(factory = AuthViewModel.factory(authRepository))
+                // Thu thập StateFlow theo lifecycle; khi state đổi, Compose dựng lại phần giao diện liên quan.
                 val authState by auth.uiState.collectAsStateWithLifecycle()
                 if (authState.username == null) AuthScreen(auth)
                 else {
+                    // Đổi khóa Compose khi đổi tài khoản để tách trạng thái giao diện giữa các người dùng.
+                    // ViewModel chi tiêu cũng có khóa chứa userId và Repository chỉ truy vấn tài khoản đó.
                     key(authState.userId) {
                         val repository = ExpenseRepository(database.dao(), authState.userId!!)
                         val model: ExpenseViewModel = viewModel(key = "expenses_${authState.userId}", factory = ExpenseViewModel.factory(repository))

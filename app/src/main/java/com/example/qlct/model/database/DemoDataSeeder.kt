@@ -6,13 +6,18 @@ import com.example.qlct.model.entity.TransactionEntity
 import com.example.qlct.model.repository.ExpenseRepository
 import java.time.LocalDate
 
-/** Explicit demo data for vu98 only. The completion flag survives logout/restarts. */
+/** Dữ liệu demo chỉ dành cho vu98; cờ hoàn tất được giữ qua đăng xuất/khởi động lại. */
 class DemoDataSeeder(private val database: ExpenseDatabase) {
+    /**
+     * Nạp 6 khoản chi mẫu chỉ cho vu98 nếu cờ demoSeeded chưa bật.
+     * Thêm dữ liệu và bật cờ trong cùng transaction: lỗi giữa chừng sẽ hoàn tác toàn bộ.
+     */
     suspend fun seed(account: LocalAccount) {
         if (account.username != "vu98") return
         database.withTransaction {
             val current = database.accountDao().find("vu98") ?: return@withTransaction
             if (current.demoSeeded) return@withTransaction
+            // Ngày mẫu được tính tại lần nạp đầu tiên, mỗi khoản lùi thêm một ngày.
             val today = LocalDate.now()
             val rows = listOf(
                 Triple(45000L, 1L, "Demo vu98: ăn trưa"),
@@ -27,6 +32,7 @@ class DemoDataSeeder(private val database: ExpenseDatabase) {
                 repository.save(TransactionEntity(type = "EXPENSE", amount = amount,
                     categoryId = category, date = today.minusDays(index.toLong()).toString(), note = note))
             }
+            // Đặt cờ sau khi thêm đủ các dòng; xóa giao dịch demo về sau sẽ không khiến hệ thống tự nạp lại.
             database.accountDao().markDemoSeeded(current.id)
         }
     }

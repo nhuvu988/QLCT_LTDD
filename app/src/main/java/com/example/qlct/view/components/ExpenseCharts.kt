@@ -25,8 +25,15 @@ import com.example.qlct.view.theme.Purple
 import java.util.Locale
 
 private val categoryColors = listOf(Purple, Color(0xFF66A0D7), Color(0xFFE7A25A), Color(0xFFA7BE71), Color(0xFF6AB3B2), Color(0xFFD9829C), Color(0xFF9B88D2))
+/**
+ * Ánh xạ ID danh mục sang bảng màu dùng chung bằng phép chia dư để màu nhất quán giữa các màn hình.
+ */
 internal fun categoryColor(id: Long) = categoryColors[((id - 1).coerceAtLeast(0) % categoryColors.size).toInt()]
 
+/**
+ * Vẽ biểu đồ vòng theo tỷ trọng khoản chi và chú giải từng danh mục.
+ * detailed bật bảng số tiền chi tiết; khi tổng chi bằng 0, hiển thị vòng nền rỗng.
+ */
 @Composable
 internal fun CategoryChart(summary: ExpenseSummary, detailed: Boolean = false) {
     DashboardCard("Chi tiêu theo danh mục", if (summary.expense == 0L) "Chưa có chi tiêu" else "${summary.categoryExpenses.size} danh mục") {
@@ -36,10 +43,12 @@ internal fun CategoryChart(summary: ExpenseSummary, detailed: Boolean = false) {
                     contentDescription = summary.categoryExpenses.joinToString("; ") { "${it.name}: ${formatMoney(it.amount)}" }.ifEmpty { "Chưa có khoản chi" }
                 }) {
                     val stroke = 25.dp.toPx()
+                    // Lùi vào nửa độ dày nét để vòng tròn không bị cắt ở biên Canvas.
                     val inset = stroke / 2
                     val arcSize = Size(size.width - stroke, size.height - stroke)
                     if (summary.expense == 0L) drawArc(Color(0xFFEDEAF5), 0f, 360f, false, Offset(inset, inset), arcSize, style = Stroke(stroke))
                     else {
+                        // Góc -90 độ bắt đầu từ đỉnh; mỗi cung có góc bằng tỷ lệ tiền của danh mục nhân 360 độ.
                         var start = -90f
                         summary.categoryExpenses.forEach { item ->
                             val sweep = (item.amount.toDouble() / summary.expense * 360).toFloat()
@@ -74,21 +83,28 @@ internal fun CategoryChart(summary: ExpenseSummary, detailed: Boolean = false) {
     }
 }
 
+/**
+ * Vẽ biểu đồ cột từ tổng chi từng tháng; cột cuối được tô đậm là tháng đang chọn.
+ * detailed bật danh sách số tiền bên dưới biểu đồ.
+ */
 @Composable
 internal fun SpendingChart(points: List<MonthlyExpense>, detailed: Boolean = false) {
     DashboardCard("Chi tiêu theo tháng", "6 tháng · VND") {
+        // Mẫu số tối thiểu bằng 1 để không chia cho 0 khi mọi tháng đều chưa có khoản chi.
         val max = points.maxOfOrNull { it.amount }?.coerceAtLeast(1L) ?: 1L
         val grid = MaterialTheme.colorScheme.surfaceVariant
         Canvas(Modifier.fillMaxWidth().height(90.dp).semantics {
             contentDescription = points.joinToString("; ") { "Tháng ${it.month.monthValue}/${it.month.year}: ${formatMoney(it.amount)}" }
         }) {
             if (points.isEmpty()) return@Canvas
+            // Chia đều chiều rộng Canvas theo số tháng; mỗi cột chiếm một phần trong ô tháng.
             val slot = size.width / points.size
             repeat(3) { i ->
                 val y = size.height * i / 2
                 drawLine(grid, Offset(0f, y), Offset(size.width, y), strokeWidth = 1.dp.toPx())
             }
             points.forEachIndexed { index, item ->
+                // Đổi tỷ lệ số tiền/max sang chiều cao pixel; hệ tọa độ Canvas có gốc ở góc trên trái.
                 val height = (item.amount.toDouble() / max * (size.height - 2.dp.toPx())).toFloat()
                 if (height > 0) drawRoundRect(if (index == points.lastIndex) Purple else Color(0xFFC6BCE8),
                     Offset(slot * index + slot * .33f, size.height - height), Size(slot * .34f, height), androidx.compose.ui.geometry.CornerRadius(3.dp.toPx()))

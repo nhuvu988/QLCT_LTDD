@@ -24,6 +24,10 @@ import com.example.qlct.view.theme.Muted
 import com.example.qlct.viewmodel.ExpenseViewModel
 
 
+/**
+ * Màn hình chi tiêu: quan sát uiState, hiển thị nội dung theo tab và gửi thao tác đến ViewModel.
+ * Chỉ giữ trạng thái giao diện tạm như tab, ngày chọn và hộp thoại; dữ liệu lâu dài nằm trong Room.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -> Unit = {}) {
@@ -31,12 +35,14 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
     val busy = state.busy
     val actionError = state.actionError
     val completedActions = state.completedActions
+    // State của các hộp thoại được lưu bằng rememberSaveable để phục hồi khi Activity tái tạo.
     var budgetMonth by rememberSaveable { mutableStateOf<String?>(null) }
     var budgetAmount by rememberSaveable { mutableStateOf<Long?>(null) }
     var editorOpen by rememberSaveable { mutableStateOf(false) }
     var editingId by rememberSaveable { mutableStateOf<Long?>(null) }
     var deletingId by rememberSaveable { mutableStateOf<Long?>(null) }
     var handledActions by rememberSaveable { mutableLongStateOf(0L) }
+    // Chỉ đóng các hộp thoại khi có thao tác mới thành công; nếu lỗi thì giữ nguyên nội dung để thử lại.
     LaunchedEffect(completedActions) {
         if (completedActions > handledActions) {
             budgetMonth = null
@@ -45,14 +51,18 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
             handledActions = completedActions
         }
     }
+    // Lưu ID đang sửa/xóa rồi tra bản ghi từ state mới nhất, tránh giữ một bản sao dữ liệu đã cũ.
     val editing = state.summary.visible.find { it.id == editingId }
     val deleting = state.summary.visible.find { it.id == deletingId }
 
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var selectedDate by rememberSaveable { mutableStateOf<String?>(null) }
+    // Đổi tháng hoặc chế độ thời gian thì bỏ ngày đang chọn để không lọc nhầm ngày ngoài khoảng xem.
     LaunchedEffect(state.month, state.monthOnly) { selectedDate = null }
+    // Tab Lịch áp dụng thêm tìm kiếm và ngày chọn; các tab khác dùng danh sách đã lọc tháng/loại.
     val displayRows = if (tab == 1) state.searchResults.filter { selectedDate == null || it.date == selectedDate } else state.summary.visible
     val listState = androidx.compose.foundation.lazy.rememberLazyListState()
+    // Mỗi lần chuyển tab đưa danh sách về đầu trang.
     LaunchedEffect(tab) { listState.scrollToItem(0) }
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -76,6 +86,7 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
         bottomBar = {
             BottomNavigation(tab, {
                 tab = it
+                // Tab Ngân sách cố định phạm vi tháng và mọi loại để các số liệu theo danh mục thống nhất.
                 if (it == 3) { model.setMonthOnly(true); model.setType("ALL") }
             }, {
                 editingId = null; model.clearError(); editorOpen = true
@@ -108,6 +119,7 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
                         }
                     }
                 }
+                // Tổng quan và Báo cáo dùng cùng dữ liệu biểu đồ; Báo cáo bật phần số tiền chi tiết.
                 if (tab == 0 || tab == 2) {
                     item { Box(Modifier.padding(horizontal = 16.dp)) { CategoryChart(state.summary, detailed = tab == 2) } }
                     item { Box(Modifier.padding(horizontal = 16.dp)) { SpendingChart(state.summary.chart, detailed = tab == 2) } }
@@ -165,6 +177,7 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
                             }
                         }
                     }
+                    // Tổng quan chỉ lấy 4 giao dịch mới nhất; khóa ID giúp Compose nhận diện dòng khi danh sách đổi.
                     items(if (tab == 0) displayRows.take(4) else displayRows, key = { it.id }) { transaction ->
                         Box(Modifier.padding(horizontal = 16.dp)) {
                             TransactionTile(transaction, busy, {
@@ -177,6 +190,7 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
         }
     }
 
+    // Các hộp thoại chuyển sự kiện về ViewModel; không tự ghi trực tiếp vào database.
     budgetMonth?.let { selectedMonth ->
         BudgetEditor(selectedMonth, budgetAmount, busy, actionError,
             onDismiss = { budgetMonth = null; model.clearError() },
@@ -188,6 +202,7 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
             onDismiss = { editorOpen = false; model.clearError() },
             onSave = model::save)
     }
+    // Xóa phải qua xác nhận; chỉ đóng sau khi completedActions tăng để lỗi xóa vẫn còn hiển thị.
     if (deleting != null) AlertDialog(
         onDismissRequest = { if (!busy) { deletingId = null; model.clearError() } },
         title = { Text("Xóa giao dịch?") },

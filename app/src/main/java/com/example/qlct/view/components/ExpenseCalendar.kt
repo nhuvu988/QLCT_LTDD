@@ -16,10 +16,17 @@ import com.example.qlct.model.entity.TransactionRow
 import java.time.LocalDate
 import java.time.YearMonth
 
+/**
+ * Dựng lịch tháng bắt đầu từ thứ Hai, đánh dấu ngày có giao dịch và ngày đang chọn.
+ * Chạm lại ngày đang chọn hoặc nút xem cả tháng sẽ gọi onSelect(null) để bỏ lọc ngày.
+ */
 @Composable
 internal fun ExpenseCalendar(month: YearMonth, rows: List<TransactionRow>, selected: String?, onSelect: (String?) -> Unit) {
+    // dayOfWeek.value là 1..7 (thứ Hai..Chủ nhật); trừ 1 để tính số ô trống đầu lịch.
     val start = month.atDay(1).dayOfWeek.value - 1
+    // Làm tròn lên số tuần rồi nhân 7 để hàng cuối luôn có đủ số ô.
     val count = ((start + month.lengthOfMonth() + 6) / 7) * 7
+    // Chuyển sang Set để tra nhanh ngày có giao dịch khi vẽ chấm đánh dấu.
     val dates = rows.map { it.date }.toSet()
     val today = LocalDate.now().toString()
     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp),
@@ -36,6 +43,7 @@ internal fun ExpenseCalendar(month: YearMonth, rows: List<TransactionRow>, selec
             (0 until count).chunked(7).forEach { week ->
                 Row(horizontalArrangement = Arrangement.spacedBy(2.dp)) {
                     week.forEach { cell ->
+                        // Chuyển chỉ số ô thành ngày thực; ô trước ngày 1 hoặc sau ngày cuối tháng chỉ là khoảng trống.
                         val day = cell - start + 1
                         if (day !in 1..month.lengthOfMonth()) Spacer(Modifier.weight(1f).height(48.dp))
                         else {

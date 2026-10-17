@@ -14,6 +14,9 @@ import androidx.compose.ui.unit.sp
 import com.example.qlct.view.theme.Muted
 import com.example.qlct.view.theme.Purple
 
+/**
+ * Dựng thanh điều hướng: nhập giao dịch và các tab Lịch (1), Báo cáo (2), Ngân sách (3), Tổng quan (0).
+ */
 @Composable
 internal fun BottomNavigation(selected: Int, onSelect: (Int) -> Unit, onAdd: () -> Unit, canAdd: Boolean) {
     Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
@@ -32,6 +35,9 @@ internal fun BottomNavigation(selected: Int, onSelect: (Int) -> Unit, onAdd: () 
     }
 }
 
+/**
+ * Hiển thị một tab với biểu tượng và nhãn; đổi màu khi được chọn và gọi onClick khi chạm.
+ */
 @Composable
 private fun NavigationButton(icon: String, label: String, selected: Boolean, onClick: () -> Unit) {
     Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(horizontal = 6.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -40,4 +46,4 @@ private fun NavigationButton(icon: String, label: String, selected: Boolean, onC
     }
 }
 
-// Code-native line icons keep the same visual weight without adding image assets.
+// Biểu tượng nét được vẽ trong Glyph bằng Canvas, giữ nét đồng đều và không cần ảnh riêng.

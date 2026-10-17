@@ -14,6 +14,9 @@ import androidx.compose.ui.unit.sp
 import com.example.qlct.viewmodel.state.ExpenseUiState
 import com.example.qlct.view.theme.IncomeGreen
 
+/**
+ * Hiển thị tháng, tổng thu/chi và chênh lệch; chuyển sự kiện đổi tháng/khoảng thời gian qua callback.
+ */
 @Composable
 internal fun DashboardHeader(state: ExpenseUiState, previous: () -> Unit, next: () -> Unit, monthOnly: (Boolean) -> Unit, allowAllTime: Boolean = true) {
     Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -37,6 +40,9 @@ internal fun DashboardHeader(state: ExpenseUiState, previous: () -> Unit, next: 
     }
 }
 
+/**
+ * Vẽ một ô tổng tiền với nhãn và màu được truyền vào; modifier cho phép chia đều chiều rộng.
+ */
 @Composable
 private fun SummaryAmount(label: String, amount: Long, color: androidx.compose.ui.graphics.Color, modifier: Modifier) {
     Surface(modifier, shape = RoundedCornerShape(12.dp), border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)) {

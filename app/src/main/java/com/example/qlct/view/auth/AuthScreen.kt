@@ -20,10 +20,14 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qlct.viewmodel.AuthViewModel
 
+/**
+ * Hiển thị đăng nhập/đăng ký từ uiState và chuyển sự kiện nhập, gửi, thử lại đến ViewModel.
+ * Các ô tài khoản chỉ được giữ bằng remember trong phiên giao diện hiện tại.
+ */
 @Composable
 fun AuthScreen(model: AuthViewModel) {
     val state by model.uiState.collectAsStateWithLifecycle()
-    // Credentials deliberately stay out of saved instance state and persistent storage.
+    // Dữ liệu nhập của biểu mẫu chỉ ở RAM, không đưa vào saved instance state hay lưu trữ lâu dài.
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var confirmation by remember { mutableStateOf("") }

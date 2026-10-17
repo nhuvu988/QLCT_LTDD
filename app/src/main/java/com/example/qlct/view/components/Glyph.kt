@@ -12,10 +12,16 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 
+/**
+ * Vẽ biểu tượng nét bằng Canvas theo kind, color và kích thước modifier; không cần ảnh bitmap.
+ */
 @Composable
 internal fun Glyph(kind: String, color: Color, modifier: Modifier = Modifier) {
     Canvas(modifier) {
         val w = size.width; val h = size.height; val stroke = 1.7.dp.toPx()
+        /**
+         * Vẽ đoạn thẳng từ tọa độ tương đối 0..1, nhân theo chiều rộng/cao Canvas để co giãn biểu tượng.
+         */
         fun line(x: Float, y: Float, xx: Float, yy: Float) = drawLine(color, Offset(w*x, h*y), Offset(w*xx, h*yy), stroke, StrokeCap.Round)
         when (kind) {
             "edit" -> { line(.18f,.72f,.7f,.15f); line(.7f,.15f,.86f,.3f); line(.86f,.3f,.34f,.87f); line(.34f,.87f,.14f,.9f); line(.14f,.9f,.18f,.72f) }

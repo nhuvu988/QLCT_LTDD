@@ -1,3 +1,4 @@
 <resources>
+    <!-- Tên ứng dụng được AndroidManifest tham chiếu bằng @string/app_name. -->
     <string name="app_name">QLCT</string>
 </resources>

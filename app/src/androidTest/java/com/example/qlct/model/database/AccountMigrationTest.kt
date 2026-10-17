@@ -14,6 +14,9 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AccountMigrationTest {
+    /**
+     * Kiểm tra migration giữ giao dịch cá nhân và tách dữ liệu mẫu cũ khỏi tài khoản.
+     */
     @Test fun migrationKeepsPersonalDataAndSeparatesOldSamples() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val name = "account-migration-test.db"
