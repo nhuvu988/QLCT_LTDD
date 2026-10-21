@@ -15,16 +15,10 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AuthRepositoryTest {
-    /**
-     * Kiểm tra đăng ký, đăng nhập và mở lại database; xác nhận mật khẩu không lưu dạng rõ.
-     */
     @Test fun registerLoginAndReopenWithoutStoringPlaintext() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val name = "auth-integration-test.db"
         context.deleteDatabase(name)
-        /**
-         * Mở lại cùng database kiểm thử để kiểm tra dữ liệu được lưu qua các lần đóng/mở.
-         */
         fun open() = Room.databaseBuilder(context, ExpenseDatabase::class.java, name).build()
         try {
             val db = open()

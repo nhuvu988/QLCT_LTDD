@@ -1,4 +1,4 @@
-// Khai báo phiên bản plugin dùng chung qua version catalog; app/build.gradle.kts mới áp dụng chúng.
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.compose.compiler) apply false

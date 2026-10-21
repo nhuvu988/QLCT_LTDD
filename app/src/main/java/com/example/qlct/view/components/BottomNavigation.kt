@@ -8,42 +8,38 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.qlct.view.theme.Muted
 import com.example.qlct.view.theme.Purple
 
-/**
- * Dựng thanh điều hướng: nhập giao dịch và các tab Lịch (1), Báo cáo (2), Ngân sách (3), Tổng quan (0).
- */
 @Composable
 internal fun BottomNavigation(selected: Int, onSelect: (Int) -> Unit, onAdd: () -> Unit, canAdd: Boolean) {
-    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 2.dp) {
-        Row(Modifier.fillMaxWidth().navigationBarsPadding().heightIn(min = 72.dp),
-            verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceEvenly) {
-            Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable(enabled = canAdd, onClick = onAdd)
-                .padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                Glyph("edit", if (canAdd) Purple else Muted, Modifier.size(24.dp))
-                Text("Nhập vào", fontSize = 10.sp, color = if (canAdd) Purple else Muted)
+    Surface(color = MaterialTheme.colorScheme.surface, shadowElevation = 10.dp) {
+        Row(Modifier.fillMaxWidth().navigationBarsPadding().height(68.dp).padding(horizontal = 12.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceAround) {
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { NavigationButton("home", "Tổng quan", selected == 0) { onSelect(0) } }
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { NavigationButton("wallet", "Giao dịch", selected == 1) { onSelect(1) } }
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) {
+            FilledIconButton(onClick = onAdd, enabled = canAdd, modifier = Modifier.size(46.dp), shape = RoundedCornerShape(16.dp), colors = IconButtonDefaults.filledIconButtonColors(containerColor = Purple)) {
+                Text("+", color = Color.White, fontSize = 28.sp, modifier = Modifier.semantics { contentDescription = "Thêm giao dịch" })
             }
-            NavigationButton("calendar", "Lịch", selected == 1) { onSelect(1) }
-            NavigationButton("chart", "Báo cáo", selected == 2) { onSelect(2) }
-            NavigationButton("wallet", "Ngân sách", selected == 3) { onSelect(3) }
-            NavigationButton("home", "Tổng quan", selected == 0) { onSelect(0) }
+            }
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { NavigationButton("chart", "Thống kê", selected == 2) { onSelect(2) } }
+            Box(Modifier.weight(1f), contentAlignment = Alignment.Center) { NavigationButton("budget", "Ngân sách", selected == 3) { onSelect(3) } }
         }
     }
 }
 
-/**
- * Hiển thị một tab với biểu tượng và nhãn; đổi màu khi được chọn và gọi onClick khi chạm.
- */
 @Composable
 private fun NavigationButton(icon: String, label: String, selected: Boolean, onClick: () -> Unit) {
-    Column(Modifier.clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(horizontal = 6.dp, vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
         Glyph(icon, if (selected) Purple else Muted, Modifier.size(20.dp))
         Text(label, fontSize = 10.sp, lineHeight = 14.sp, color = if (selected) Purple else Muted, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
     }
 }
 
-// Biểu tượng nét được vẽ trong Glyph bằng Canvas, giữ nét đồng đều và không cần ảnh riêng.
+// Code-native line icons keep the same visual weight without adding image assets.

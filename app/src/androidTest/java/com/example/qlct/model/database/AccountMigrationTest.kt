@@ -14,9 +14,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class AccountMigrationTest {
-    /**
-     * Kiểm tra migration giữ giao dịch cá nhân và tách dữ liệu mẫu cũ khỏi tài khoản.
-     */
     @Test fun migrationKeepsPersonalDataAndSeparatesOldSamples() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val name = "account-migration-test.db"
@@ -46,5 +43,19 @@ class AccountMigrationTest {
             assertTrue(second.id > 1)
             assertTrue(db.dao().observeTransactions(second.id).first().isEmpty())
         } finally { db.close(); context.deleteDatabase(name) }
+    }
+
+    @Test fun seedContainsCategoriesAndNoTransactions() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        SQLiteDatabase.create(null).use { db ->
+            db.execSQL("CREATE TABLE categories (id INTEGER PRIMARY KEY, name TEXT NOT NULL)")
+            db.execSQL("CREATE TABLE transactions (id INTEGER PRIMARY KEY)")
+            db.execSQL("CREATE TABLE local_account (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT UNIQUE NOT NULL, salt TEXT NOT NULL, passwordHash TEXT NOT NULL, demoSeeded INTEGER NOT NULL DEFAULT 0)")
+            context.assets.open("seed.sql").bufferedReader().use { it.readText() }
+                .split(';').map(String::trim).filter(String::isNotEmpty).forEach(db::execSQL)
+            db.rawQuery("SELECT COUNT(*) FROM categories",null).use { it.moveToFirst(); assertEquals(7,it.getInt(0)) }
+            db.rawQuery("SELECT COUNT(*) FROM transactions",null).use { it.moveToFirst(); assertEquals(0,it.getInt(0)) }
+            db.rawQuery("SELECT username FROM local_account",null).use { it.moveToFirst(); assertEquals("vu98",it.getString(0)) }
+        }
     }
 }

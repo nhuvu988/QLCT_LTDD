@@ -11,9 +11,6 @@ class BudgetAndSearchTest {
         TransactionRow(2,"EXPENSE",150,2,"2026-09-30","Đổ xăng","Di chuyển"),
         TransactionRow(3,"INCOME",5000,3,"2026-10-02","Lương tháng","Lương"))
 
-    /**
-     * Kiểm tra các mốc cảnh báo ngân sách và tiến trình luôn giới hạn trong 0..1.
-     */
     @Test fun warningBoundariesAndProgress() {
         assertEquals(BudgetLevel.NONE, BudgetStatus(null,800).level)
         assertEquals(BudgetLevel.NORMAL, BudgetStatus(1000,799).level)
@@ -26,9 +23,6 @@ class BudgetAndSearchTest {
         assertEquals(0f, BudgetStatus(1000,0).progress, 0f)
     }
 
-    /**
-     * Kiểm tra tìm kiếm không phân biệt dấu, hoa/thường và khoảng trắng thừa.
-     */
     @Test fun searchIgnoresAccentsCaseAndExtraSpaces() {
         assertEquals(listOf(1L), searchTransactions(rows,"  AN   truong ").map { it.id })
         assertEquals(listOf(2L), searchTransactions(rows,"ĐỔ XĂNG").map { it.id })
@@ -39,9 +33,6 @@ class BudgetAndSearchTest {
         assertTrue(searchTransactions(rows,"%'").isEmpty())
     }
 
-    /**
-     * Kiểm tra tìm kiếm kết hợp bộ lọc tháng/loại nhưng không đổi tổng tiền và ngân sách.
-     */
     @Test fun searchCombinesWithMonthAndTypeWithoutChangingTotalsOrBudget() {
         val october = YearMonth.of(2026,10)
         val summary = summarize(rows,october,true,"EXPENSE")
@@ -54,14 +45,8 @@ class BudgetAndSearchTest {
         assertEquals(200L, BudgetStatus(1000,allIncome.chart.last().amount).remaining)
     }
 
-    /**
-     * Kiểm tra tổng chi dùng cho ngân sách thay đổi đúng sau sửa hoặc xóa giao dịch.
-     */
     @Test fun budgetTracksTransactionEditsAndDeletes() {
         val month = YearMonth.of(2026,10)
-        /**
-         * Lấy tổng chi của tháng kiểm thử từ điểm cuối biểu đồ 6 tháng.
-         */
         fun spent(items: List<TransactionRow>) = summarize(items,month,false,"ALL").chart.last().amount
         assertEquals(800L, spent(rows))
         assertEquals(1200L, spent(rows.map { if (it.id==1L) it.copy(amount=1200) else it }))

@@ -19,9 +19,6 @@ import org.junit.runner.RunWith
 class ExpenseDatabaseTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
-    /**
-     * Kiểm tra nâng cấp database cũ, thêm/sửa/xóa giao dịch và dữ liệu còn sau khi mở lại.
-     */
     @Test fun legacyDatabaseMigratesAndCrudPersists() = runBlocking {
         val name = "migration-test.db"
         context.deleteDatabase(name)
@@ -34,9 +31,6 @@ class ExpenseDatabaseTest {
             legacy.execSQL("INSERT INTO transactions VALUES (42,'EXPENSE',12345,7,'2026-01-31','Giữ dữ liệu cũ')")
             legacy.version = 1
         }
-        /**
-         * Mở lại cùng database kiểm thử để kiểm tra dữ liệu được lưu qua các lần đóng/mở.
-         */
         fun open() = Room.databaseBuilder(context, ExpenseDatabase::class.java, name)
             .addMigrations(ExpenseDatabase.MIGRATION_1_2, ExpenseDatabase.MIGRATION_2_3, ExpenseDatabase.MIGRATION_3_4, ExpenseDatabase.MIGRATION_4_5, ExpenseDatabase.MIGRATION_5_6).build()
         try {
@@ -67,15 +61,12 @@ class ExpenseDatabaseTest {
                 assertEquals("Sửa", row.note)
                 assertEquals("INCOME", row.type)
                 assertEquals(22222L, row.amount)
-                ExpenseRepository(db.dao()).delete(row.id)
+                db.dao().delete(row.id)
             }
             open().useDb { assertTrue(it.dao().observeTransactions().first().isEmpty()) }
         } finally { context.deleteDatabase(name) }
     }
 }
 
-/**
- * Thực thi block với database và luôn đóng kết nối trong finally, kể cả khi kiểm tra thất bại.
- */
 private inline fun <T> ExpenseDatabase.useDb(block: (ExpenseDatabase) -> T): T =
     try { block(this) } finally { close() }

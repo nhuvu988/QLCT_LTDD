@@ -1,5 +1,4 @@
 <resources>
-    <!-- Theme nền của Activity không có ActionBar; giao diện bên trong dùng QlctTheme của Compose. -->
     <style name="Theme.QLCT" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:windowActionModeOverlay">true</item>
     </style>

@@ -1,8 +1,6 @@
-<!-- Biểu tượng ví dạng vector: tọa độ các path nằm trong khung 48 x 48. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="48dp" android:height="48dp"
     android:viewportWidth="48" android:viewportHeight="48">
-    <!-- Lần lượt vẽ nền, thân ví, ngăn khóa và chốt; path phía sau nằm trên path phía trước. -->
     <path android:fillColor="#006B54" android:pathData="M0,0h48v48h-48z" />
     <path android:fillColor="#FFFFFF" android:pathData="M10,12h28v25h-28z" />
     <path android:fillColor="#006B54" android:pathData="M27,22h13v10h-13z" />

@@ -11,9 +11,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.qlct.view.theme.Muted
 
-/**
- * Khung thẻ dùng chung có tiêu đề, phụ đề tùy chọn và nội dung Compose do nơi gọi truyền vào.
- */
 @Composable
 internal fun DashboardCard(title: String, subtitle: String? = null, content: @Composable ColumnScope.() -> Unit) {
     Surface(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface, shadowElevation = 1.dp) {

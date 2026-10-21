@@ -21,10 +21,6 @@ import com.example.qlct.view.theme.Muted
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
-/**
- * Hiển thị một giao dịch: danh mục, ngày, ghi chú và số tiền có dấu theo Thu/Chi.
- * Chạm dòng gọi onEdit, nút thùng rác gọi onDelete; cả hai bị khóa khi busy.
- */
 @Composable
 internal fun TransactionTile(transaction: TransactionRow, busy: Boolean, onEdit: () -> Unit, onDelete: () -> Unit) {
     val color = categoryColor(transaction.categoryId)

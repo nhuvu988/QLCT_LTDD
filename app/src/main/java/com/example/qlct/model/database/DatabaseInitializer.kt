@@ -4,14 +4,9 @@ import androidx.room.withTransaction
 import com.example.qlct.model.entity.Category
 import com.example.qlct.model.entity.LocalAccount
 
-/** Khởi tạo qua Room DAO trước xác thực; có thể chạy lại trên database đã có dữ liệu. */
+/** Seed through Room DAOs before authentication; safe to repeat on existing databases. */
 class DatabaseInitializer(private val database: ExpenseDatabase) {
-    /**
-     * Nạp 7 danh mục và tài khoản vu98 trong cùng một transaction Room.
-     * Có thể gọi lại trước mỗi lần xác thực vì các lệnh chèn đều bỏ qua dữ liệu đã có.
-     */
     suspend fun initialize() {
-        // Transaction bảo đảm danh mục và tài khoản mặc định cùng hoàn tất hoặc cùng bị hoàn tác.
         database.withTransaction {
             database.dao().insertCategoriesIfMissing(
                 listOf(
@@ -24,7 +19,7 @@ class DatabaseInitializer(private val database: ExpenseDatabase) {
                     Category(7, "Khác")
                 )
             )
-            // Giữ thông tin demo hiện có; IGNORE bảo toàn ID, mật khẩu và cờ của tài khoản đã tồn tại.
+            // Same demo credentials as before. IGNORE preserves an existing ID/password/flag.
             database.accountDao().insertIfMissing(
                 LocalAccount(
                     username = "vu98",

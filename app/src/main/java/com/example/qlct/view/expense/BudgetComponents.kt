@@ -18,22 +18,16 @@ import com.example.qlct.view.components.DashboardCard
 import com.example.qlct.view.components.formatMoney
 import java.time.YearMonth
 
-/**
- * Hiển thị số đã chi, hạn mức, còn lại/vượt mức và màu cảnh báo theo BudgetStatus.
- * Nút chỉnh sửa chỉ phát sự kiện onEdit; việc lưu ngân sách do ViewModel đảm nhiệm.
- */
 @Composable
 fun MonthlyBudgetCard(month: YearMonth, status: BudgetStatus, busy: Boolean, onEdit: () -> Unit) {
     DashboardCard("Ngân sách tháng ${month.monthValue}/${month.year}") {
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Text("Đã chi: ${formatMoney(status.spent)}", style = MaterialTheme.typography.titleMedium)
+            Text("Luôn tính riêng tháng này, kể cả khi xem toàn bộ giao dịch.", style = MaterialTheme.typography.bodySmall)
+            Text("Đã chi: ${formatMoney(status.spent)}")
             if (status.limit == null) {
                 Text("Chưa đặt ngân sách cho tháng này.")
-                LinearProgressIndicator(progress = { 0f }, modifier = Modifier.fillMaxWidth(),
-                    trackColor = MaterialTheme.colorScheme.outlineVariant)
             } else {
                 Text("Hạn mức: ${formatMoney(status.limit)}")
-                // Màu đỏ cho hết/vượt hạn mức, vàng từ 80%, còn lại dùng màu chính.
                 val color = when (status.level) {
                     BudgetLevel.EXCEEDED, BudgetLevel.REACHED -> MaterialTheme.colorScheme.error
                     BudgetLevel.WARNING -> Color(0xFFAD6800)
@@ -56,17 +50,12 @@ fun MonthlyBudgetCard(month: YearMonth, status: BudgetStatus, busy: Boolean, onE
     }
 }
 
-/**
- * Hộp thoại thêm/sửa hạn mức; kiểm tra số tiền trước khi gọi onSave.
- * Chỉ có nút xóa khi đã tồn tại ngân sách và yêu cầu xác nhận trước khi gọi onDelete.
- */
 @Composable
 fun BudgetEditor(month: String, initialAmount: Long?, busy: Boolean, actionError: String?,
     onDismiss: () -> Unit, onSave: (Long) -> Unit, onDelete: () -> Unit) {
     var amount by rememberSaveable { mutableStateOf(initialAmount?.toString() ?: "") }
     var checked by rememberSaveable { mutableStateOf(false) }
     var confirmDelete by rememberSaveable { mutableStateOf(false) }
-    // Chỉ bắt đầu hiển thị validation sau khi người dùng nhấn Lưu.
     val error = if (checked) AmountValidator.errorForInput(amount) else null
     AlertDialog(
         onDismissRequest = { if (!busy) onDismiss() },
@@ -87,7 +76,6 @@ fun BudgetEditor(month: String, initialAmount: Long?, busy: Boolean, actionError
         }) { Text(if (busy) "Đang lưu…" else "Lưu") } },
         dismissButton = { TextButton(onClick = onDismiss, enabled = !busy) { Text("Hủy") } }
     )
-    // Hộp thoại xác nhận riêng trước khi xóa hạn mức tháng.
     if (confirmDelete) AlertDialog(
         onDismissRequest = { if (!busy) confirmDelete = false },
         title = { Text("Xóa ngân sách $month?") },

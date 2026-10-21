@@ -7,9 +7,6 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-/**
- * Áp dụng bảng màu Material 3 theo chế độ sáng/tối của hệ thống cho toàn bộ content.
- */
 @Composable
 fun QlctTheme(content: @Composable () -> Unit) {
     MaterialTheme(colorScheme = if (isSystemInDarkTheme()) darkColorScheme() else

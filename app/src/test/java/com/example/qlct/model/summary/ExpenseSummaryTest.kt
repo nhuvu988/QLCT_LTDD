@@ -6,14 +6,8 @@ import org.junit.Assert.*
 import org.junit.Test
 
 class ExpenseSummaryTest {
-    /**
-     * Tạo nhanh dòng giao dịch với danh mục cố định cho các tình huống tính tổng.
-     */
     private fun row(id: Long, type: String, amount: Long, date: String) = TransactionRow(id, type, amount, 1, date, "", "Khác")
 
-    /**
-     * Kiểm tra lọc loại không đổi biểu đồ và khoản thu không bị cộng vào tổng chi.
-     */
     @Test fun filtersDoNotChangeChartAndIncomeIsExcludedFromExpense() {
         val rows = listOf(row(1, "INCOME", 1000, "2026-01-01"), row(2, "EXPENSE", 200, "2026-01-31"),
             row(3, "EXPENSE", 300, "2025-12-31"), row(4, "EXPENSE", 999, "2025-01-01"))
@@ -27,9 +21,6 @@ class ExpenseSummaryTest {
         assertEquals(1499L, summarize(rows, YearMonth.of(2026, 1), false, "ALL").expense)
     }
 
-    /**
-     * Kiểm tra tháng rỗng và ngày 29/2 được tổng hợp đúng.
-     */
     @Test fun emptyMonthsAndLeapDayAreHandled() {
         val result = summarize(listOf(row(1, "EXPENSE", 999999999999, "2024-02-29")), YearMonth.of(2024, 2), true, "ALL")
         assertEquals(999999999999L, result.expense)
@@ -38,9 +29,6 @@ class ExpenseSummaryTest {
         assertTrue(summarize(emptyList(), YearMonth.of(2024, 2), true, "ALL").chart.all { it.amount == 0L })
     }
 
-    /**
-     * Kiểm tra nhóm chi theo danh mục có lọc thời gian nhưng độc lập với bộ lọc Thu/Chi.
-     */
     @Test fun categoryChartGroupsExpensesAndRespectsPeriodButNotTypeFilter() {
         val rows = listOf(
             row(1, "EXPENSE", 100, "2026-10-01"),

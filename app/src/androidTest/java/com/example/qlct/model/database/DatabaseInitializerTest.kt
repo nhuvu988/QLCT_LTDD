@@ -16,9 +16,6 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 class DatabaseInitializerTest {
-    /**
-     * Gọi khởi tạo đồng thời để kiểm tra không trùng danh mục/tài khoản và chưa tự nạp giao dịch.
-     */
     @Test fun concurrentInitializationIsIdempotentAndDoesNotSeedTransactions() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val db = Room.inMemoryDatabaseBuilder(context, ExpenseDatabase::class.java).build()
@@ -37,9 +34,6 @@ class DatabaseInitializerTest {
         }
     }
 
-    /**
-     * Cố ý gây lỗi transaction để xác nhận cờ demoSeeded cũng được hoàn tác.
-     */
     @Test fun demoCompletionFlagRollsBackWithRoomTransaction() = runBlocking {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val db = Room.inMemoryDatabaseBuilder(context, ExpenseDatabase::class.java).build()
@@ -52,7 +46,7 @@ class DatabaseInitializerTest {
                     error("Simulate interrupted seeding")
                 }
             } catch (_: IllegalStateException) {
-                // Transaction thất bại phải hoàn tác cờ đánh dấu nạp demo hoàn tất.
+                // A failed transaction must not mark the demo as complete.
             }
             assertFalse(requireNotNull(db.accountDao().find("vu98")).demoSeeded)
         } finally {

@@ -4,10 +4,10 @@
 
 ## Ngân sách tháng và tìm kiếm giao dịch
 
-- **Ngân sách → Đặt ngân sách**: chọn tháng ở đầu màn hình và lưu hạn mức tổng chi. Có sửa và xóa (xác nhận trước khi xóa), không ảnh hưởng giao dịch.
+- **Tổng quan / Thống kê → Ngân sách tháng → Đặt ngân sách**: chọn tháng ở đầu màn hình và lưu hạn mức tổng chi. Có sửa và xóa (xác nhận trước khi xóa), không ảnh hưởng giao dịch.
 - Hiển thị Đã chi, Hạn mức, Còn lại/Vượt ngân sách và tiến trình. Cảnh báo từ 80%, hết ngân sách ở 100%, vượt mức khi >100%. Mỗi tài khoản và tháng có hạn mức riêng. Tháng chưa đặt hạn mức không hiển thị cảnh báo.
 - Ngân sách luôn tính tổng khoản chi của tháng đã chọn, không phụ thuộc bộ lọc Thu/Chi, tìm kiếm hoặc chế độ xem toàn bộ thời gian. Thêm/sửa/xóa/chuyển ngày giao dịch cập nhật lại qua Room Flow.
-- **Lịch → Tìm ghi chú hoặc danh mục**: hỗ trợ chữ hoa/thường và tiếng Việt không dấu (ví dụ `an trua`, `do xang`). Mọi từ khóa phải khớp ghi chú hoặc tên danh mục. Kết hợp bộ lọc tháng và Thu/Chi. Nút Xóa xóa từ khóa, không xóa giao dịch. Số kết quả và trạng thái không tìm thấy cập nhật ngay.
+- **Giao dịch → Tìm ghi chú hoặc danh mục**: hỗ trợ chữ hoa/thường và tiếng Việt không dấu (ví dụ `an trua`, `do xang`). Mọi từ khóa phải khớp ghi chú hoặc tên danh mục. Kết hợp bộ lọc tháng và Thu/Chi. Nút Xóa xóa từ khóa, không xóa giao dịch. Số kết quả và trạng thái không tìm thấy cập nhật ngay.
 - Tìm kiếm chỉ thay đổi danh sách, không thay đổi số dư/tổng thu chi, biểu đồ hoặc ngân sách. Chưa có ngân sách theo danh mục hoặc thông báo nền.
 - [Phụ lục Word: Ngân sách và Tìm kiếm](docs/Phu_luc_Ngan_sach_Tim_kiem.docx), [sơ đồ](docs/diagrams/budget_search), [kết quả kiểm thử](docs/budget_search_validation.txt). Phụ lục bổ sung cho báo cáo Word/PDF cũ; ảnh trong báo cáo cũ chưa phản ánh hai tính năng mới.
 - Tạo lại phụ lục: cài `python-docx`, `matplotlib`, chạy `python docs/budget_report.py`.
@@ -15,9 +15,9 @@
 ## Phiên bản hiện tại
 
 - Thêm, sửa, xóa giao dịch thu/chi.
-- Đăng nhập/đăng ký cục bộ, nhiều tài khoản với giao dịch tách riêng theo `user_id`. Tài khoản mới có 0 giao dịch, tổng thu/chi bằng 0. Nút Đăng xuất cố định ở đầu màn hình và hoạt động trên các tab. Tên đăng nhập 3–32 ký tự không dấu/số/_, mật khẩu 8–128 ký tự. Mật khẩu lưu dưới dạng PBKDF2 với salt ngẫu nhiên, không lưu dạng rõ. Phiên chỉ ở bộ nhớ; chưa có cloud hoặc khôi phục mật khẩu.
+- Đăng nhập/đăng ký cục bộ, nhiều tài khoản với giao dịch tách riêng theo `user_id`. Tài khoản mới có 0 giao dịch, tổng thu/chi bằng 0. Nút Đăng xuất cố định ở đầu màn hình và hoạt động trên cả ba tab. Tên đăng nhập 3–32 ký tự không dấu/số/_, mật khẩu 8–128 ký tự. Mật khẩu lưu dưới dạng PBKDF2 với salt ngẫu nhiên, không lưu dạng rõ. Phiên chỉ ở bộ nhớ; chưa có cloud hoặc khôi phục mật khẩu.
 - Lọc theo loại giao dịch, chọn tháng hoặc toàn bộ thời gian; hiển thị tổng thu/chi và chênh lệch.
-- Room lưu dữ liệu cục bộ; `DatabaseInitializer` dùng Room DAO tạo 7 danh mục và tài khoản mẫu `vu98` (mật khẩu `11111111`) nếu chưa có. Seed chạy trong Room transaction trước thao tác xác thực, dùng @Insert(IGNORE) để giữ ID, mật khẩu và dữ liệu hiện có. Theo yêu cầu demo, tài khoản `vu98` được nạp riêng 6 khoản chi (ăn trưa, xăng, sách, đồ dùng, phòng, ăn sáng), tổng 1.345.000 VND, một lần sau đăng ký/đăng nhập thành công. `DemoDataSeeder` lưu cờ `demoSeeded` trong Room nên mở lại/đăng nhập lại không nhân đôi và không tái tạo dòng đã xóa. Các tài khoản khác vẫn bắt đầu rỗng. Dữ liệu khởi tạo chứa salt và hash PBKDF2 của mật khẩu demo, không chứa mật khẩu dạng rõ. Tài khoản mẫu dùng để trình diễn; các tài khoản tự đăng ký lưu salt ngẫu nhiên riêng.
+- Room lưu dữ liệu cục bộ; `DatabaseInitializer` dùng Room DAO tạo 7 danh mục và tài khoản mẫu `vu98` (mật khẩu `11111111`) nếu chưa có. Seed chạy trong Room transaction trước thao tác xác thực, dùng @Insert(IGNORE) để giữ ID, mật khẩu và dữ liệu hiện có. Theo yêu cầu demo, tài khoản `vu98` được nạp riêng 6 khoản chi (ăn trưa, xăng, sách, đồ dùng, phòng, ăn sáng), tổng 1.345.000 VND, một lần sau đăng ký/đăng nhập thành công. `DemoDataSeeder` lưu cờ `demoSeeded` trong Room nên mở lại/đăng nhập lại không nhân đôi và không tái tạo dòng đã xóa. Các tài khoản khác vẫn bắt đầu rỗng. Seed chứa salt và hash PBKDF2 của mật khẩu demo, không chứa mật khẩu dạng rõ. Tài khoản mẫu dùng để trình diễn; các tài khoản tự đăng ký lưu salt ngẫu nhiên riêng.
 - Biểu đồ cột tổng chi của 6 tháng đến tháng đã chọn, kèm số tiền từng tháng.
 - Giao diện tông tím, thẻ bo góc, biểu đồ vòng phân bổ khoản chi theo danh mục và thanh điều hướng Tổng quan / Giao dịch / Thống kê. Nút + mở biểu mẫu thêm giao dịch; chạm giao dịch để sửa và nút thùng rác để xóa có xác nhận.
 - Báo cáo đồ án hiện tại: [Word](docs/Bao_cao_Do_an_QLCT_Compose_MVVM_Room.docx) và [PDF](docs/Bao_cao_Do_an_QLCT_Compose_MVVM_Room.pdf), mô tả bản Compose–MVVM–Room, 9 use case, 12 sơ đồ và 8 ảnh giao diện thật. Nguồn sơ đồ PNG/SVG nằm trong `docs/diagrams/current/`; sinh báo cáo bằng `docs/build_final_report.py` (cần python-docx, matplotlib và Pillow). Bổ sung tên trường, khoa, lớp, giảng viên, năm học và xác nhận phân công thực tế trước khi nộp. Báo cáo Basic và đề cương cũ là tài liệu lịch sử.
@@ -43,7 +43,7 @@ Biểu đồ chỉ cộng khoản chi, độc lập với bộ lọc Thu/Chi c�
 
 Mọi thao tác dữ liệu khi chạy ứng dụng (tài khoản, danh mục, giao dịch, ngân sách và dữ liệu mẫu) đi qua Room DAO. `DatabaseInitializer` nạp danh mục/tài khoản bằng `@Insert(IGNORE)` trong `withTransaction` trước khi kiểm tra tài khoản, đăng nhập hoặc đăng ký. `DemoDataSeeder` thêm giao dịch và cập nhật cờ hoàn tất qua DAO trong cùng một transaction. Không nạp seed bằng callback `execSQL` hoặc truy cập `openHelper` trong nghiệp vụ.
 
-Dữ liệu mặc định được định nghĩa trong `DatabaseInitializer.kt`; giao dịch mẫu nằm trong `DemoDataSeeder.kt`. SQL nâng cấp schema nằm trong các `Migration` của Room. Database SQLite là `qlct.db`, version 6; cập nhật ứng dụng giữ dữ liệu cũ. Các báo cáo và script biên soạn báo cáo cũ là snapshot lịch sử, có thể mô tả cơ chế khởi tạo trước đây.
+`app/src/main/assets/seed.sql` là bản SQL tham khảo cho báo cáo và kiểm tra SQLite trên máy tính, không được ứng dụng thực thi. Khi sửa dữ liệu mặc định, sửa `DatabaseInitializer.kt` và cập nhật bản tham khảo này. SQL nâng cấp schema vẫn nằm trong các `Migration` của Room; đó là một phần của Room, không phải database thứ hai. Database vẫn là `qlct.db`, version 6, không đổi schema hoặc xóa dữ liệu cũ. Phiên đăng nhập/UI state là trạng thái tạm thời như trước.
 
 ## Cấu trúc source theo MVVM
 
