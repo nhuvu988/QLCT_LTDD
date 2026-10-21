@@ -7,7 +7,7 @@ import androidx.room.ForeignKey
 @Entity(
     tableName = "budgets",
     primaryKeys = ["user_id", "month"],
-    foreignKeys = [ForeignKey(entity = LocalAccount::class,
+    foreignKeys = [ForeignKey(entity = User::class,
         parentColumns = ["id"], childColumns = ["user_id"])]
 )
 data class MonthlyBudget(

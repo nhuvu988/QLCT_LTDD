@@ -19,6 +19,7 @@ import com.example.qlct.view.components.DashboardCard
 import com.example.qlct.view.components.DashboardHeader
 import com.example.qlct.view.components.SpendingChart
 import com.example.qlct.view.components.TransactionTile
+import com.example.qlct.view.components.ThemeToggleButton
 import com.example.qlct.view.theme.Muted
 import com.example.qlct.view.theme.Purple
 import com.example.qlct.viewmodel.ExpenseViewModel
@@ -26,7 +27,8 @@ import com.example.qlct.viewmodel.ExpenseViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -> Unit = {}) {
+fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -> Unit = {},
+                  darkTheme: Boolean = false, onToggleTheme: () -> Unit = {}) {
     val state by model.uiState.collectAsStateWithLifecycle()
     val busy = state.busy
     val actionError = state.actionError
@@ -61,6 +63,7 @@ fun ExpenseScreen(model: ExpenseViewModel, username: String = "", onLogout: () -
                     verticalAlignment = Alignment.CenterVertically) {
                     Text("Tài khoản: $username", modifier = Modifier.weight(1f),
                         maxLines = 1, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis)
+                    ThemeToggleButton(darkTheme, onToggleTheme)
                     TextButton(onClick = onLogout, enabled = !busy,
                         colors = ButtonDefaults.textButtonColors(contentColor = androidx.compose.ui.graphics.Color.White)) {
                         Text("Đăng xuất", fontWeight = FontWeight.Bold)

@@ -43,7 +43,7 @@ Biểu đồ chỉ cộng khoản chi, độc lập với bộ lọc Thu/Chi c�
 
 Mọi thao tác dữ liệu khi chạy ứng dụng (tài khoản, danh mục, giao dịch, ngân sách và dữ liệu mẫu) đi qua Room DAO. `DatabaseInitializer` nạp danh mục/tài khoản bằng `@Insert(IGNORE)` trong `withTransaction` trước khi kiểm tra tài khoản, đăng nhập hoặc đăng ký. `DemoDataSeeder` thêm giao dịch và cập nhật cờ hoàn tất qua DAO trong cùng một transaction. Không nạp seed bằng callback `execSQL` hoặc truy cập `openHelper` trong nghiệp vụ.
 
-`app/src/main/assets/seed.sql` là bản SQL tham khảo cho báo cáo và kiểm tra SQLite trên máy tính, không được ứng dụng thực thi. Khi sửa dữ liệu mặc định, sửa `DatabaseInitializer.kt` và cập nhật bản tham khảo này. SQL nâng cấp schema vẫn nằm trong các `Migration` của Room; đó là một phần của Room, không phải database thứ hai. Database vẫn là `qlct.db`, version 6, không đổi schema hoặc xóa dữ liệu cũ. Phiên đăng nhập/UI state là trạng thái tạm thời như trước.
+`app/src/main/assets/seed.sql` là bản SQL tham khảo cho báo cáo và kiểm tra SQLite trên máy tính, không được ứng dụng thực thi. Khi sửa dữ liệu mặc định, sửa `DatabaseInitializer.kt` và cập nhật bản tham khảo này. SQL nâng cấp schema vẫn nằm trong các `Migration` của Room; đó là một phần của Room, không phải database thứ hai. Database vẫn là `qlct.db`, version 7; migration 6→7 đổi bảng tài khoản thành `users` và giữ dữ liệu cũ. Phiên đăng nhập/UI state là trạng thái tạm thời như trước.
 
 ## Cấu trúc source theo MVVM
 
@@ -133,3 +133,7 @@ Unit test mới: `BudgetAndSearchTest` kiểm tra mốc cảnh báo, tìm kiếm
 - `ExpenseViewModel.uiState: StateFlow<ExpenseUiState>` là nguồn trạng thái duy nhất cho màn hình chi tiêu: dữ liệu, bộ lọc, ngân sách, loading, busy, actionError và completedActions.
 - View thu thập bằng `collectAsStateWithLifecycle()`; gửi thao tác qua các hàm ViewModel. Các MutableStateFlow đều private, giao diện không ghi trực tiếp state.
 - Dữ liệu lâu dài nằm trong Room; bộ lọc dùng SavedStateHandle; trạng thái biểu mẫu/dialog tạm thời dùng Compose state. UI state không thay thế database.
+
+## Tên bảng tài khoản
+
+Bản hiện tại dùng bảng `users` và entity `User` (`model/entity/User.kt`). `transactions.user_id` và `budgets.user_id` tham chiếu `users.id`. Tên `local_account` chỉ còn trong migration/fixture của các phiên bản cũ. Đường nâng cấp v6→v7 giữ ID, salt/hash, cờ demo, giao dịch, ngân sách và bộ đếm ID. Không cần gỡ app.

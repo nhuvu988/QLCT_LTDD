@@ -1,14 +1,14 @@
 package com.example.qlct.model.database
 
 import androidx.room.withTransaction
-import com.example.qlct.model.entity.LocalAccount
+import com.example.qlct.model.entity.User
 import com.example.qlct.model.entity.TransactionEntity
 import com.example.qlct.model.repository.ExpenseRepository
 import java.time.LocalDate
 
 /** Explicit demo data for vu98 only. The completion flag survives logout/restarts. */
 class DemoDataSeeder(private val database: ExpenseDatabase) {
-    suspend fun seed(account: LocalAccount) {
+    suspend fun seed(account: User) {
         if (account.username != "vu98") return
         database.withTransaction {
             val current = database.accountDao().find("vu98") ?: return@withTransaction

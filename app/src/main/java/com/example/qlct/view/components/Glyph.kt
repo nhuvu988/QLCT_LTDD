@@ -18,6 +18,23 @@ internal fun Glyph(kind: String, color: Color, modifier: Modifier = Modifier) {
         val w = size.width; val h = size.height; val stroke = 1.7.dp.toPx()
         fun line(x: Float, y: Float, xx: Float, yy: Float) = drawLine(color, Offset(w*x, h*y), Offset(w*xx, h*yy), stroke, StrokeCap.Round)
         when (kind) {
+            "sun" -> {
+                drawCircle(color, w*.2f, Offset(w*.5f,h*.5f), style = Stroke(stroke))
+                line(.5f,.05f,.5f,.16f); line(.5f,.84f,.5f,.95f)
+                line(.05f,.5f,.16f,.5f); line(.84f,.5f,.95f,.5f)
+                line(.18f,.18f,.26f,.26f); line(.74f,.74f,.82f,.82f)
+                line(.18f,.82f,.26f,.74f); line(.74f,.26f,.82f,.18f)
+            }
+            "moon" -> {
+                val path = androidx.compose.ui.graphics.Path().apply {
+                    moveTo(w*.7f,h*.12f)
+                    cubicTo(w*.1f,-h*.02f,-w*.02f,h*.82f,w*.5f,h*.9f)
+                    cubicTo(w*.76f,h*.94f,w*.93f,h*.75f,w*.9f,h*.56f)
+                    cubicTo(w*.46f,h*.72f,w*.34f,h*.29f,w*.7f,h*.12f)
+                    close()
+                }
+                drawPath(path,color,style = Stroke(stroke))
+            }
             "budget" -> {
                 drawRoundRect(color, Offset(w*.18f,h*.1f), Size(w*.64f,h*.8f), androidx.compose.ui.geometry.CornerRadius(w*.08f), style = Stroke(stroke))
                 line(.32f,.3f,.68f,.3f); line(.32f,.5f,.55f,.5f); line(.32f,.7f,.6f,.7f)

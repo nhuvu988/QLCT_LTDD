@@ -9,11 +9,11 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 import com.example.qlct.model.dao.AccountDao
 import com.example.qlct.model.dao.ExpenseDao
 import com.example.qlct.model.entity.Category
-import com.example.qlct.model.entity.LocalAccount
+import com.example.qlct.model.entity.User
 import com.example.qlct.model.entity.MonthlyBudget
 import com.example.qlct.model.entity.TransactionEntity
 
-@Database(entities = [Category::class, TransactionEntity::class, LocalAccount::class, MonthlyBudget::class], version = 6, exportSchema = true)
+@Database(entities = [Category::class, TransactionEntity::class, User::class, MonthlyBudget::class], version = 7, exportSchema = true)
 abstract class ExpenseDatabase : RoomDatabase() {
     abstract fun dao(): ExpenseDao
     abstract fun accountDao(): AccountDao
@@ -81,9 +81,32 @@ abstract class ExpenseDatabase : RoomDatabase() {
             }
         }
 
+        // Đổi tên bảng và dựng lại các FK để tương thích cả SQLite trên Android cũ.
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE local_account RENAME TO users")
+                db.execSQL("DROP INDEX index_local_account_username")
+                db.execSQL("CREATE UNIQUE INDEX index_users_username ON users(username)")
+                db.execSQL("CREATE TEMP TABLE migration_sequences AS SELECT seq FROM sqlite_sequence WHERE name='transactions'")
+                db.execSQL("CREATE TABLE transactions_new (id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, type TEXT NOT NULL, amount INTEGER NOT NULL, category_id INTEGER NOT NULL, date TEXT NOT NULL, note TEXT NOT NULL DEFAULT '', user_id INTEGER, FOREIGN KEY(category_id) REFERENCES categories(id) ON UPDATE NO ACTION ON DELETE NO ACTION, FOREIGN KEY(user_id) REFERENCES users(id) ON UPDATE NO ACTION ON DELETE NO ACTION)")
+                db.execSQL("INSERT INTO transactions_new SELECT id,type,amount,category_id,date,note,user_id FROM transactions")
+                db.execSQL("DROP TABLE transactions")
+                db.execSQL("ALTER TABLE transactions_new RENAME TO transactions")
+                db.execSQL("UPDATE sqlite_sequence SET seq=MAX(seq,COALESCE((SELECT seq FROM migration_sequences LIMIT 1),seq)) WHERE name='transactions'")
+                db.execSQL("DROP TABLE migration_sequences")
+                db.execSQL("CREATE INDEX transactions_date ON transactions(date)")
+                db.execSQL("CREATE INDEX index_transactions_category_id ON transactions(category_id)")
+                db.execSQL("CREATE INDEX index_transactions_user_id ON transactions(user_id)")
+                db.execSQL("CREATE TABLE budgets_new (user_id INTEGER NOT NULL, month TEXT NOT NULL, amount INTEGER NOT NULL, PRIMARY KEY(user_id, month), FOREIGN KEY(user_id) REFERENCES users(id) ON UPDATE NO ACTION ON DELETE NO ACTION)")
+                db.execSQL("INSERT INTO budgets_new SELECT user_id,month,amount FROM budgets")
+                db.execSQL("DROP TABLE budgets")
+                db.execSQL("ALTER TABLE budgets_new RENAME TO budgets")
+            }
+        }
+
         fun getInstance(context: Context): ExpenseDatabase = instance ?: synchronized(this) {
             instance ?: Room.databaseBuilder(context.applicationContext, ExpenseDatabase::class.java, "qlct.db")
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7)
                 .build().also { instance = it }
         }
     }

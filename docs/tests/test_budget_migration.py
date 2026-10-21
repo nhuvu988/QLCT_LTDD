@@ -6,7 +6,7 @@ schemas=root/'app/schemas/com.example.qlct.model.database.ExpenseDatabase'
 v5=json.loads((schemas/'5.json').read_text())['database']
 v6=json.loads((schemas/'6.json').read_text())['database']
 source=(root/'app/src/main/java/com/example/qlct/model/database/ExpenseDatabase.kt').read_text(encoding='utf-8')
-block=source.split('val MIGRATION_5_6 =',1)[1].split('fun getInstance',1)[0]
+block=source.split('val MIGRATION_5_6 =',1)[1].split('val MIGRATION_6_7',1)[0]
 statements=re.findall(r'db.execSQL\("([^"\n]+)"\)',block)
 assert statements
 with tempfile.TemporaryDirectory() as folder:
@@ -16,7 +16,7 @@ with tempfile.TemporaryDirectory() as folder:
     for entity in v5['entities']:
         db.execute(entity['createSql'].replace('${TABLE_NAME}',entity['tableName']))
         for index in entity['indices']: db.execute(index['createSql'].replace('${TABLE_NAME}',entity['tableName']))
-    db.executescript((root/'app/src/main/assets/seed.sql').read_text(encoding='utf-8'))
+    db.executescript((root/'app/src/main/assets/seed.sql').read_text(encoding='utf-8').replace('users', 'local_account'))
     owner=db.execute("SELECT id FROM local_account WHERE username='vu98'").fetchone()[0]
     db.execute("INSERT INTO local_account(username,salt,passwordHash,demoSeeded) VALUES ('second','s','h',0)")
     other=db.execute("SELECT id FROM local_account WHERE username='second'").fetchone()[0]

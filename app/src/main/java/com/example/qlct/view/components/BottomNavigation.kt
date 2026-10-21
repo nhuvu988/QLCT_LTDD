@@ -37,8 +37,8 @@ internal fun BottomNavigation(selected: Int, onSelect: (Int) -> Unit, onAdd: () 
 @Composable
 private fun NavigationButton(icon: String, label: String, selected: Boolean, onClick: () -> Unit) {
     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).clickable(onClick = onClick).padding(vertical = 8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        Glyph(icon, if (selected) Purple else Muted, Modifier.size(20.dp))
-        Text(label, fontSize = 10.sp, lineHeight = 14.sp, color = if (selected) Purple else Muted, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
+        Glyph(icon, if (selected) MaterialTheme.colorScheme.primary else Muted, Modifier.size(20.dp))
+        Text(label, fontSize = 10.sp, lineHeight = 14.sp, color = if (selected) MaterialTheme.colorScheme.primary else Muted, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal)
     }
 }
 

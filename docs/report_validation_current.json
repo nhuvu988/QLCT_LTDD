@@ -1,0 +1,18 @@
+{
+  "date": "2026-10-21",
+  "source_commit": "88a210d",
+  "unit_tests": 16,
+  "unit_failures": 0,
+  "android_tests": 10,
+  "android_failures": 0,
+  "lint_errors": 0,
+  "lint_warnings": 12,
+  "host_scripts_passed": 6,
+  "screenshots": 25,
+  "notes": [
+    "First Android run: 8/9 passed; the restored seed-reference test split SQL comments at a semicolon.",
+    "Fixed by stripping full-line SQL comments in that test; complete Android suite rerun: 9/9 passed.",
+    "Current source includes persistent theme toggle and users table v7; current Android suite includes UserTableMigrationTest.",
+    "Host script PASS values refer to the six scripts executed on 2026-10-21, not rerun by this collector."
+  ]
+}

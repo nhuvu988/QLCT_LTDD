@@ -3,7 +3,7 @@ package com.example.qlct.model.repository
 import com.example.qlct.model.dao.AccountDao
 import com.example.qlct.model.database.DatabaseInitializer
 import com.example.qlct.model.database.DemoDataSeeder
-import com.example.qlct.model.entity.LocalAccount
+import com.example.qlct.model.entity.User
 import com.example.qlct.model.validation.AccountValidator
 import java.security.MessageDigest
 import java.security.SecureRandom
@@ -22,20 +22,20 @@ class AuthRepository(
         return dao.account() != null
     }
 
-    suspend fun register(username: String, password: String, confirmation: String): LocalAccount {
+    suspend fun register(username: String, password: String, confirmation: String): User {
         initializer?.initialize()
         require(AccountValidator.error(username, password, confirmation) == null)
         val name = AccountValidator.username(username)
         require(dao.find(name) == null) { "Tên đăng nhập đã được sử dụng." }
         val salt = ByteArray(32).also { SecureRandom().nextBytes(it) }
         val hash = derive(password, salt)
-        val account = LocalAccount(username = name, salt = hex(salt), passwordHash = hex(hash))
+        val account = User(username = name, salt = hex(salt), passwordHash = hex(hash))
         val created = account.copy(id = dao.create(account).toInt())
         demoSeeder?.seed(created)
         return created
     }
 
-    suspend fun login(username: String, password: String): LocalAccount? {
+    suspend fun login(username: String, password: String): User? {
         initializer?.initialize()
         val account = dao.find(AccountValidator.username(username)) ?: return null
         val hash = derive(password, unhex(account.salt))

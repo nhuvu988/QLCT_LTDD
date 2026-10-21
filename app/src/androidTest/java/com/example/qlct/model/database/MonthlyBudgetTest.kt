@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.example.qlct.model.entity.LocalAccount
+import com.example.qlct.model.entity.User
 import com.example.qlct.model.entity.MonthlyBudget
 import com.example.qlct.model.repository.ExpenseRepository
 import kotlinx.coroutines.flow.first
@@ -22,8 +22,8 @@ class MonthlyBudgetTest {
         fun open() = Room.databaseBuilder(context,ExpenseDatabase::class.java,name).build()
         var db = open()
         try {
-            val a = db.accountDao().create(LocalAccount(username="one",salt="s",passwordHash="h")).toInt()
-            val b = db.accountDao().create(LocalAccount(username="two",salt="s",passwordHash="h")).toInt()
+            val a = db.accountDao().create(User(username="one",salt="s",passwordHash="h")).toInt()
+            val b = db.accountDao().create(User(username="two",salt="s",passwordHash="h")).toInt()
             var first = ExpenseRepository(db.dao(),a)
             val second = ExpenseRepository(db.dao(),b)
             first.saveBudget("2026-10",1000)

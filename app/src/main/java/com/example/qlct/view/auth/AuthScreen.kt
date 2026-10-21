@@ -19,9 +19,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.qlct.viewmodel.AuthViewModel
+import com.example.qlct.view.components.ThemeToggleButton
 
 @Composable
-fun AuthScreen(model: AuthViewModel) {
+fun AuthScreen(model: AuthViewModel, darkTheme: Boolean = false, onToggleTheme: () -> Unit = {}) {
     val state by model.uiState.collectAsStateWithLifecycle()
     // Credentials deliberately stay out of saved instance state and persistent storage.
     var username by remember { mutableStateOf("") }
@@ -29,11 +30,15 @@ fun AuthScreen(model: AuthViewModel) {
     var confirmation by remember { mutableStateOf("") }
     var showPassword by remember { mutableStateOf(false) }
     Column(
-        modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(Color(0xFF7560C6), Color(0xFFF6F5FA))))
+        modifier = Modifier.fillMaxSize().background(Brush.verticalGradient(listOf(
+            if (darkTheme) Color(0xFF382650) else Color(0xFF7560C6), MaterialTheme.colorScheme.background)))
             .safeDrawingPadding().imePadding().verticalScroll(rememberScrollState()).padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+            ThemeToggleButton(darkTheme, onToggleTheme)
+        }
         Text("QLCT", color = Color.White, fontSize = 36.sp, fontWeight = FontWeight.Bold)
         Text("Quản lý chi tiêu cá nhân", color = Color.White)
         Spacer(Modifier.height(28.dp))

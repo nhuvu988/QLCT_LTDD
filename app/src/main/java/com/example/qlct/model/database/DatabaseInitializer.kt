@@ -2,7 +2,7 @@ package com.example.qlct.model.database
 
 import androidx.room.withTransaction
 import com.example.qlct.model.entity.Category
-import com.example.qlct.model.entity.LocalAccount
+import com.example.qlct.model.entity.User
 
 /** Seed through Room DAOs before authentication; safe to repeat on existing databases. */
 class DatabaseInitializer(private val database: ExpenseDatabase) {
@@ -21,7 +21,7 @@ class DatabaseInitializer(private val database: ExpenseDatabase) {
             )
             // Same demo credentials as before. IGNORE preserves an existing ID/password/flag.
             database.accountDao().insertIfMissing(
-                LocalAccount(
+                User(
                     username = "vu98",
                     salt = "b2ea81dcc8c674ea3914db94b644bf0fae3a677bf0387dbd8bc06a3deea60b92",
                     passwordHash = "a014aeb700922c52bd3cc1cd5ecde76baf01f54ea9454097acb3e45c9fecf021"

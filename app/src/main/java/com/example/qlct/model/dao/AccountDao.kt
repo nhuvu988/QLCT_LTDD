@@ -4,22 +4,22 @@ import androidx.room.Dao
 import androidx.room.OnConflictStrategy
 import androidx.room.Insert
 import androidx.room.Query
-import com.example.qlct.model.entity.LocalAccount
+import com.example.qlct.model.entity.User
 
 @Dao
 interface AccountDao {
-    @Query("SELECT * FROM local_account ORDER BY id LIMIT 1")
-    suspend fun account(): LocalAccount?
+    @Query("SELECT * FROM users ORDER BY id LIMIT 1")
+    suspend fun account(): User?
 
-    @Query("SELECT * FROM local_account WHERE username = :username")
-    suspend fun find(username: String): LocalAccount?
+    @Query("SELECT * FROM users WHERE username = :username")
+    suspend fun find(username: String): User?
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
-    suspend fun insertIfMissing(account: LocalAccount): Long
+    suspend fun insertIfMissing(account: User): Long
 
-    @Query("UPDATE local_account SET demoSeeded = 1 WHERE id = :accountId")
+    @Query("UPDATE users SET demoSeeded = 1 WHERE id = :accountId")
     suspend fun markDemoSeeded(accountId: Int)
 
     @Insert
-    suspend fun create(account: LocalAccount): Long
+    suspend fun create(account: User): Long
 }

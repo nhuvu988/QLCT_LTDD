@@ -6,8 +6,8 @@ import androidx.room.Index
 import androidx.room.PrimaryKey
 
 // This account protects the device's existing expense database, not a cloud account.
-@Entity(tableName = "local_account", indices = [Index(value = ["username"], unique = true)])
-data class LocalAccount(
+@Entity(tableName = "users", indices = [Index(value = ["username"], unique = true)])
+data class User(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val username: String,
     val salt: String,

@@ -16,7 +16,7 @@ VALUES
 -- Demo account: PBKDF2-HMAC-SHA1, 600000 iterations, 256-bit output.
 -- Do not replace an existing account or reset its password/ID.
 -- Room generates the ID. DemoDataSeeder links transactions.user_id to that ID.
-INSERT OR IGNORE INTO local_account (
+INSERT OR IGNORE INTO users (
     username,
     salt,
     passwordHash,

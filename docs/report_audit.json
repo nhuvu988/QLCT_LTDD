@@ -1,8 +1,8 @@
 {
-  "file": "D:\\AndroidStudioWorkspace\\QLCT_LTDD\\docs\\Bao_cao_Do_an_QLCT_Compose_MVVM_Room.docx",
-  "paragraphs": 558,
-  "tables": 35,
-  "figures": 20,
+  "file": "D:\\AndroidStudioWorkspace\\QLCT_LTDD\\docs\\Bao_cao_Do_an_QLCT.docx",
+  "paragraphs": 323,
+  "tables": 17,
+  "figures": 32,
   "members": [
     [
       "Nguyễn Như Vũ",
@@ -21,10 +21,10 @@
       "25810035"
     ]
   ],
-  "word_count": 14104,
-  "validated": "DOCX ZIP, XML, embedded images, student IDs",
-  "pages": 67,
-  "requirements_explained": true,
-  "seed_sql_explained": true,
-  "word_fields_updated": true
+  "word_count": 8121,
+  "validated": "DOCX XML and images; PDF parsed; no upgrade or development-history content; no broken references",
+  "pages": 45,
+  "word_fields_updated": true,
+  "pdf_exported": true,
+  "focus": "Academic project report: functions, overall design, Use Case, MVVM, ERD, UI, testing, teamwork"
 }

@@ -6,7 +6,7 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[2]
 source = (root / 'app/src/main/java/com/example/qlct/model/database/DatabaseInitializer.kt').read_text(encoding='utf-8')
-schema = json.loads((root / 'app/schemas/com.example.qlct.model.database.ExpenseDatabase/6.json').read_text(encoding='utf-8'))['database']
+schema = json.loads((root / 'app/schemas/com.example.qlct.model.database.ExpenseDatabase/7.json').read_text(encoding='utf-8'))['database']
 with sqlite3.connect(':memory:') as db:
     for entity in schema['entities']:
         db.execute(entity['createSql'].replace('${TABLE_NAME}', entity['tableName']))
@@ -17,5 +17,5 @@ with sqlite3.connect(':memory:') as db:
     assert len(expected) == 7
     assert db.execute('SELECT id, name FROM categories ORDER BY id').fetchall() == expected
     account = tuple(re.search(field + r' = "([^"]+)"', source).group(1) for field in ('username', 'salt', 'passwordHash'))
-    assert db.execute('SELECT username, salt, passwordHash FROM local_account').fetchall() == [account]
+    assert db.execute('SELECT username, salt, passwordHash FROM users').fetchall() == [account]
 print('PASS: reference SQL matches Room initializer categories and demo credentials.')

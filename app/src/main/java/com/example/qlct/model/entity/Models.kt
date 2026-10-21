@@ -13,7 +13,7 @@ data class Category(@PrimaryKey val id: Long, val name: String)
     tableName = "transactions",
     foreignKeys = [
         ForeignKey(entity = Category::class, parentColumns = ["id"], childColumns = ["category_id"]),
-        ForeignKey(entity = LocalAccount::class, parentColumns = ["id"], childColumns = ["user_id"])
+        ForeignKey(entity = User::class, parentColumns = ["id"], childColumns = ["user_id"])
     ],
     indices = [Index(value = ["date"], name = "transactions_date"), Index(value = ["category_id"]), Index(value = ["user_id"])]
 )
